@@ -90,15 +90,39 @@ mod tests {
         if let Input::StdIn = lb.input {
             assert!(true);
         } else {
-            assert!(false);
+            assert!(false, "Correct type not implemented");
         }
 
         if let Output::StdOut = lb.output {
             assert!(true);
         } else {
-            assert!(false);
+            assert!(false, "Correct type not implemented");
         }
 
         assert_eq!(editor.new_text, lb.editor.new_text);
+    }
+
+    #[test]
+    fn linurgy_add_input() {
+        let buffer = String::from("Test builder");
+        let mut lb = LinurgyBuilder::new();
+
+        lb.add_input(Input::Buffer(&buffer));
+        match lb.input {
+            Input::Buffer(text) => assert_eq!(&buffer, text),
+            _ => assert!(false, "Correct type not implemented"),
+        }
+        
+        lb.add_input(Input::File(String::from("filename")));
+        match lb.input {
+            Input::File(ref text) => assert_eq!("filename", text),
+            _ => assert!(false, "Correct type not implemented"),
+        }
+
+        lb.add_input(Input::StdIn);
+        match lb.input {
+            Input::StdIn => assert!(true),
+            _ => assert!(false, "Correct type not implemented"),
+        }
     }
 }
