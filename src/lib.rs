@@ -21,7 +21,7 @@ impl Default for Editor {
     fn default() -> Self {
         Editor {
             newline_count_trigger: 2,
-            new_text: String::From("-------\n"),
+            new_text: String::from("-------\n"),
             current_count: 0,
             buffer: String::new(),
         }
@@ -50,7 +50,7 @@ mod tests {
 
     #[test]
     fn default_editor() {
-        let editor = Editor::Default();
+        let editor = Editor::default();
         assert_eq!(2, editor.newline_count_trigger);
         assert_eq!(0, editor.current_count);
         assert_eq!("", editor.buffer);
