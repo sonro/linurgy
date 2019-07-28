@@ -44,3 +44,16 @@ impl Default for LinurgyBuilder {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn default_editor() {
+        let editor = Editor::Default();
+        assert_eq!(2, editor.newline_count_trigger);
+        assert_eq!(0, editor.current_count);
+        assert_eq!("", editor.buffer);
+        assert_eq!("-------\n", editor.new_text);
+    }
+}
