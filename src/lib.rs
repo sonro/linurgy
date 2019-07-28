@@ -125,4 +125,29 @@ mod tests {
             _ => assert!(false, "Correct type not implemented"),
         }
     }
+
+    #[test]
+    fn linurgy_add_output() {
+        let mut buffer = String::from("Test builder");
+        let mut buffer2 = String::from("Test builder");
+        let mut lb = LinurgyBuilder::new();
+
+        lb.add_output(Output::Buffer(&mut buffer));
+        match lb.output {
+            Output::Buffer(ref text) => assert_eq!(&&mut buffer2, text),
+            _ => assert!(false, "Correct type not implemented"),
+        }
+        
+        lb.add_output(Output::File(String::from("filename")));
+        match lb.output {
+            Output::File(ref text) => assert_eq!("filename", text),
+            _ => assert!(false, "Correct type not implemented"),
+        }
+
+        lb.add_output(Output::StdOut);
+        match lb.output {
+            Output::StdOut => assert!(true),
+            _ => assert!(false, "Correct type not implemented"),
+        }
+    }
 }
