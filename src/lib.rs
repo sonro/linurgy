@@ -44,6 +44,32 @@ impl Default for LinurgyBuilder<'_, '_> {
     }
 }
 
+impl<'a, 'b> LinurgyBuilder<'a, 'b> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn add_input(&mut self, input: Input<'a>) -> &mut Self {
+        self.input = input;
+        self
+    }
+
+    pub fn add_output(&mut self, output: Output<'b>) -> &mut Self {
+        self.output = output;
+        self
+    }
+
+    pub fn add_newline_trigger(&mut self, count: u8) -> &mut Self {
+        self.editor.newline_count_trigger = count;
+        self
+    }
+
+    pub fn add_new_text(&mut self, new_text: String) -> &mut Self {
+        self.editor.new_text = new_text;
+        self
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -59,7 +85,7 @@ mod tests {
 
     #[test]
     fn default_linurgy_builder() {
-        let lb = LinurgyBuilder::default();
+        let lb = LinurgyBuilder::new();
         let editor = Editor::default();
         if let Input::StdIn = lb.input {
             assert!(true);
