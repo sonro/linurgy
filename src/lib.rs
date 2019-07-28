@@ -56,4 +56,23 @@ mod tests {
         assert_eq!("", editor.buffer);
         assert_eq!("-------\n", editor.new_text);
     }
+
+    #[test]
+    fn default_linurgy_builder() {
+        let lb = LinurgyBuilder::default();
+        let editor = Editor::default();
+        if let Input::StdIn = lb.input {
+            assert!(true);
+        } else {
+            assert!(false);
+        }
+
+        if let Output::StdOut = lb.output {
+            assert!(true);
+        } else {
+            assert!(false);
+        }
+
+        assert_eq!(editor.new_text, lb.editor.new_text);
+    }
 }
