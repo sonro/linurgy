@@ -10,6 +10,13 @@ pub enum Output<'b> {
     Buffer(String),
 }
 
+pub struct Editor {
+    newline_count_trigger: u8,
+    new_text: String,
+    current_count: u8,
+    buffer: String
+}
+
 pub struct LinurgyBuilder {
     input:  Input,
     output: Output,
