@@ -1,13 +1,13 @@
-pub enum Input {
+pub enum Input<'a> {
     StdIn,
     File(String),
-    Buffer(String),
+    Buffer(&'a String),
 }
 
 pub enum Output<'b> {
     StdOut,
     File(String),
-    Buffer(String),
+    Buffer(&'b mut String),
 }
 
 pub struct Editor {
@@ -28,13 +28,13 @@ impl Default for Editor {
     }
 }
 
-pub struct LinurgyBuilder {
-    input:  Input,
-    output: Output,
+pub struct LinurgyBuilder<'a, 'b> {
+    input:  Input<'a>,
+    output: Output<'b>,
     editor: Editor,
 }
 
-impl Default for LinurgyBuilder {
+impl Default for LinurgyBuilder<'_, '_> {
     fn default() -> Self {
         LinurgyBuilder {
             input: Input::StdIn,
