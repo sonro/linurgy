@@ -1,4 +1,4 @@
-use std::io;
+use std::io::{self, Write};
 use std::fs;
 
 pub enum Input<'a> {
@@ -133,12 +133,31 @@ impl<'a, 'b> LinurgyBuilder<'a, 'b> {
         self
     }
 
-    pub fn process(&mut self, mut reader: impl io::BufRead) {
-        match self.output {
-            Output::Buffer(ref mut buffer) => {
-                reader.read_line(buffer);
+    pub fn process(&mut self, reader: impl io::BufRead) {
+        let mut buffer = String::new();
+
+        for line in reader.lines() {
+            let line = line.unwrap() + "\n";
+            self.editor.add_line(line);
+            if let Some(edited) = self.editor.try_output() {
+                match self.output {
+                    Output::StdOut => print!("{}", &edited),
+                    _ => buffer += &edited,
+                }
             }
-            _ => unimplemented!(),
+        }
+
+        match self.output {
+            Output::File(ref name) => {
+                let mut file = fs::File::create(name)
+                    .expect("Unable to create file");
+                file.write_all(buffer.as_bytes())
+                    .expect("unable to write to file");
+            }
+            Output::Buffer(ref mut buf) => {
+                buf.push_str(&buffer);
+            }
+            _ => (),
         }
     }
 }
