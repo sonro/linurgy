@@ -42,7 +42,12 @@ impl Editor {
             self.current_count += 1;
             if self.current_count == self.newline_count_trigger {
                 self.current_count = 0;
-                self.buffer += &self.new_text;
+                match &self.edit_type {
+                    EditType::Append => self.buffer += &self.new_text,
+                    EditType::Insert => {
+                        self.buffer.insert_str(0, &self.new_text);
+                    }
+                }
             }
         }
     }
@@ -242,6 +247,18 @@ mod tests {
         ed.add_line(line);
         assert_eq!("test text\n more\n\n\n-------\n", ed.buffer);
         assert_eq!(0, ed.current_count);
+    }
+
+    #[test]
+    fn editor_add_line_with_diff_edit_type() {
+        let mut ed = Editor::default();
+        ed.edit_type = EditType::Insert;
+
+        let line = String::from("\n");
+        ed.add_line(line);
+        let line = String::from("\n");
+        ed.add_line(line);
+        assert_eq!("-------\n\n\n", ed.buffer);
     }
 
     #[test]
