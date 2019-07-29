@@ -39,6 +39,16 @@ impl Editor {
             }
         }
     }
+
+    fn try_output(&mut self) -> Option<String> {
+        if self.current_count == 0 {
+            let output = self.buffer.clone();
+            self.buffer.clear();
+            Some(output)
+        } else {
+            None
+        }
+    }
 }
 
 pub struct LinurgyBuilder<'a, 'b> {
@@ -203,5 +213,25 @@ mod tests {
         ed.add_line(line);
         assert_eq!("test text\n more\n\n\n-------\n", ed.buffer);
         assert_eq!(0, ed.current_count);
+    }
+
+    #[test]
+    fn editor_try_output() {
+        let mut ed = Editor::default();
+        assert_eq!(Some(String::from("")), ed.try_output());
+
+        let line = String::from("\n");
+        ed.add_line(line);
+        assert_eq!(None, ed.try_output());
+
+        let line = String::from("\n");
+        ed.add_line(line);
+        assert_eq!(Some(String::from("\n\n-------\n")), ed.try_output());
+        assert_eq!(Some(String::from("")), ed.try_output());
+
+        let line = String::from("test\n");
+        ed.add_line(line);
+        assert_eq!(Some(String::from("test\n")), ed.try_output());
+
     }
 }
