@@ -28,6 +28,19 @@ impl Default for Editor {
     }
 }
 
+impl Editor {
+    fn add_line(&mut self, line: String) {
+        self.buffer += &line;
+        if line == "\n" {
+            self.current_count += 1;
+            if self.current_count == self.newline_count_trigger {
+                self.current_count = 0;
+                self.buffer += &self.new_text;
+            }
+        }
+    }
+}
+
 pub struct LinurgyBuilder<'a, 'b> {
     input:  Input<'a>,
     output: Output<'b>,
@@ -165,5 +178,13 @@ mod tests {
         
         lb.add_new_text(String::from("cheese"));
         assert_eq!("cheese", lb.editor.new_text);
+    }
+
+    #[test]
+    fn editor_add_line() {
+        let mut ed = Editor::default();
+        let line = String::from("This is a line of test text\n");
+        ed.add_line(line);
+        assert_eq!("This is a line of test text\n", ed.buffer);
     }
 }
