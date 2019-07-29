@@ -150,4 +150,20 @@ mod tests {
             _ => assert!(false, "Correct type not implemented"),
         }
     }
+
+    #[test]
+    fn linurgy_add_newline_trigger() {
+        let mut lb = LinurgyBuilder::new();
+        
+        lb.add_newline_trigger(5);
+        assert_eq!(5, lb.editor.newline_count_trigger);
+    }
+
+    #[test]
+    fn linurgy_add_new_text() {
+        let mut lb = LinurgyBuilder::new();
+        
+        lb.add_new_text(String::from("cheese"));
+        assert_eq!("cheese", lb.editor.new_text);
+    }
 }
