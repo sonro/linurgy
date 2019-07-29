@@ -4,7 +4,7 @@ use std::fs;
 pub enum Input<'a> {
     StdIn,
     File(String),
-    Buffer(&'a String),
+    Buffer(&'a str),
 }
 
 pub enum Output<'b> {
@@ -57,9 +57,7 @@ impl Editor {
 
     fn try_output(&mut self) -> Option<String> {
         if self.current_count == 0 {
-            let output = self.buffer.clone();
-            self.buffer.clear();
-            Some(output)
+            Some(self.buffer.drain(..).collect())
         } else {
             None
         }
