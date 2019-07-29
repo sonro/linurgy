@@ -10,9 +10,15 @@ pub enum Output<'b> {
     Buffer(&'b mut String),
 }
 
+pub enum EditType {
+    Append,
+    Insert,
+}
+
 pub struct Editor {
     newline_count_trigger: u8,
     new_text: String,
+    edit_type: EditType,
     current_count: u8,
     buffer: String
 }
@@ -22,6 +28,7 @@ impl Default for Editor {
         Editor {
             newline_count_trigger: 2,
             new_text: String::from("-------\n"),
+            edit_type: EditType::Append,
             current_count: 0,
             buffer: String::new(),
         }
@@ -91,6 +98,11 @@ impl<'a, 'b> LinurgyBuilder<'a, 'b> {
         self.editor.new_text = new_text;
         self
     }
+
+    pub fn add_edit_type(&mut self, edit_type: EditType) -> &mut Self {
+        self.editor.edit_type = edit_type;
+        self
+    }
 }
 
 #[cfg(test)]
@@ -104,6 +116,11 @@ mod tests {
         assert_eq!(0, editor.current_count);
         assert_eq!("", editor.buffer);
         assert_eq!("-------\n", editor.new_text);
+        if let EditType::Append = editor.edit_type {
+            assert!(true);
+        } else {
+            assert!(false, "Correct type not implemented");
+        }
     }
 
     #[test]
@@ -188,6 +205,18 @@ mod tests {
         
         lb.add_new_text(String::from("cheese"));
         assert_eq!("cheese", lb.editor.new_text);
+    }
+
+    #[test]
+    fn linurgy_add_edit_type() {
+        let mut lb = LinurgyBuilder::new();
+        
+        lb.add_edit_type(EditType::Insert);
+        if let EditType::Insert = editor.edit_type {
+            assert!(true);
+        } else {
+            assert!(false, "Correct type not implemented");
+        }
     }
 
     #[test]
