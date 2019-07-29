@@ -39,8 +39,8 @@ impl Default for Editor {
 }
 
 impl Editor {
-    fn add_line(&mut self, line: String) {
-        self.buffer += &line;
+    fn add_line(&mut self, line: &str) {
+        self.buffer += line;
         if line == "\n" {
             self.current_count += 1;
             if self.current_count == self.newline_count_trigger {
@@ -138,7 +138,7 @@ impl<'a, 'b> LinurgyBuilder<'a, 'b> {
 
         for line in reader.lines() {
             let line = line.unwrap() + "\n";
-            self.editor.add_line(line);
+            self.editor.add_line(&line);
             if let Some(edited) = self.editor.try_output() {
                 match self.output {
                     Output::StdOut => print!("{}", &edited),
@@ -281,22 +281,22 @@ mod tests {
         let mut ed = Editor::default();
 
         let line = String::from("test text\n");
-        ed.add_line(line);
+        ed.add_line(&line);
         assert_eq!("test text\n", ed.buffer);
         assert_eq!(0, ed.current_count);
 
         let line = String::from(" more\n");
-        ed.add_line(line);
+        ed.add_line(&line);
         assert_eq!("test text\n more\n", ed.buffer);
         assert_eq!(0, ed.current_count);
 
         let line = String::from("\n");
-        ed.add_line(line);
+        ed.add_line(&line);
         assert_eq!("test text\n more\n\n", ed.buffer);
         assert_eq!(1, ed.current_count);
 
         let line = String::from("\n");
-        ed.add_line(line);
+        ed.add_line(&line);
         assert_eq!("test text\n more\n\n\n-------\n", ed.buffer);
         assert_eq!(0, ed.current_count);
     }
@@ -307,9 +307,8 @@ mod tests {
         ed.edit_type = EditType::Insert;
 
         let line = String::from("\n");
-        ed.add_line(line);
-        let line = String::from("\n");
-        ed.add_line(line);
+        ed.add_line(&line);
+        ed.add_line(&line);
         assert_eq!("-------\n\n\n", ed.buffer);
     }
 
@@ -319,16 +318,15 @@ mod tests {
         assert_eq!(Some(String::from("")), ed.try_output());
 
         let line = String::from("\n");
-        ed.add_line(line);
+        ed.add_line(&line);
         assert_eq!(None, ed.try_output());
 
-        let line = String::from("\n");
-        ed.add_line(line);
+        ed.add_line(&line);
         assert_eq!(Some(String::from("\n\n-------\n")), ed.try_output());
         assert_eq!(Some(String::from("")), ed.try_output());
 
         let line = String::from("test\n");
-        ed.add_line(line);
+        ed.add_line(&line);
         assert_eq!(Some(String::from("test\n")), ed.try_output());
     }
 }
