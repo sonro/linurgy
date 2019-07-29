@@ -62,6 +62,14 @@ impl Editor {
             None
         }
     }
+
+    fn get_remaining_output(&mut self) -> Option<String> {
+        if !self.buffer.is_empty() {
+            Some(self.buffer.drain(..).collect())
+        } else {
+            None
+        }
+    }
 }
 
 pub struct LinurgyBuilder<'a, 'b> {
@@ -142,6 +150,13 @@ impl<'a, 'b> LinurgyBuilder<'a, 'b> {
                     Output::StdOut => print!("{}", &edited),
                     _ => buffer += &edited,
                 }
+            }
+        }
+
+        if let Some(edited) = self.editor.get_remaining_output() {
+            match self.output {
+                Output::StdOut => print!("{}", &edited),
+                _ => buffer += &edited,
             }
         }
 
