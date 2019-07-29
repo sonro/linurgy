@@ -212,7 +212,7 @@ mod tests {
         let mut lb = LinurgyBuilder::new();
         
         lb.add_edit_type(EditType::Insert);
-        if let EditType::Insert = editor.edit_type {
+        if let EditType::Insert = lb.editor.edit_type {
             assert!(true);
         } else {
             assert!(false, "Correct type not implemented");
