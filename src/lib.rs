@@ -16,6 +16,7 @@ pub enum Output<'b> {
 pub enum EditType {
     Append,
     Insert,
+    Replace,
 }
 
 pub struct Editor {
@@ -49,6 +50,9 @@ impl Editor {
                     EditType::Append => self.buffer += &self.new_text,
                     EditType::Insert => {
                         self.buffer.insert_str(0, &self.new_text);
+                    }
+                    EditType::Replace => {
+                        self.buffer.replace_range(.., &self.new_text);
                     }
                 }
             }
@@ -323,6 +327,14 @@ mod tests {
         ed.add_line(&line);
         ed.add_line(&line);
         assert_eq!("-------\n\n\n", ed.buffer);
+
+        let mut ed = Editor::default();
+        ed.edit_type = EditType::Replace;
+
+        let line = String::from("\n");
+        ed.add_line(&line);
+        ed.add_line(&line);
+        assert_eq!("-------\n", ed.buffer);
     }
 
     #[test]
