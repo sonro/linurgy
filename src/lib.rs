@@ -327,4 +327,39 @@ mod tests {
         ed.add_line(&line);
         assert_eq!(Some(String::from("test\n")), ed.try_output());
     }
+
+    #[test]
+    fn linurgy_process() {
+        let mut output = String::new();
+        let mut lb = LinurgyBuilder::new();
+        lb.add_output(Output::Buffer(&mut output));
+
+        let input = String::from("test\nlines\n");
+        let reader = io::Cursor::new(&input);
+        lb.process(reader);
+        assert_eq!("test\nlines\n", &output);
+
+        let mut output = String::new();
+        let mut lb = LinurgyBuilder::new();
+        lb.add_output(Output::Buffer(&mut output));
+
+        let input = String::from("\n\n");
+        let reader = io::Cursor::new(&input);
+        lb.process(reader);
+        assert_eq!("\n\n-------\n", &output);
+
+        let mut output = String::new();
+        let mut lb = LinurgyBuilder::new();
+        lb.add_output(Output::Buffer(&mut output));
+
+        let input = String::from("\n\n test post text\n\n");
+        let reader = io::Cursor::new(&input);
+        lb.process(reader);
+        assert_eq!("\n\n-------\n test post text\n\n", &output);
+    }
+
+    #[test]
+    fn linurgy_run() {
+    }
+
 }
