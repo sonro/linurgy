@@ -1,4 +1,5 @@
 use std::io;
+use std::fs;
 
 pub enum Input<'a> {
     StdIn,
@@ -112,17 +113,20 @@ impl<'a, 'b> LinurgyBuilder<'a, 'b> {
     }
 
     pub fn run(&mut self) -> &mut Self {
-        match &self.input {
+        match self.input {
             Input::StdIn => {
                 let stdin = io::stdin();
                 let reader = stdin.lock();
                 self.process(reader);
             }
-            Input::File(name) => {
-                unimplemented!();
+            Input::File(ref name) => {
+                let file = fs::File::open(name).expect("Unable to open file");
+                let reader = io::BufReader::new(file);
+                self.process(reader);
             }
             Input::Buffer(buffer) => {
-                unimplemented!();
+                let reader = io::Cursor::new(buffer);
+                self.process(reader);
             }
         }
 
