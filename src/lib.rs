@@ -1,3 +1,5 @@
+use std::io;
+
 pub enum Input<'a> {
     StdIn,
     File(String),
@@ -107,6 +109,33 @@ impl<'a, 'b> LinurgyBuilder<'a, 'b> {
     pub fn add_edit_type(&mut self, edit_type: EditType) -> &mut Self {
         self.editor.edit_type = edit_type;
         self
+    }
+
+    pub fn run(&mut self) -> &mut Self {
+        match &self.input {
+            Input::StdIn => {
+                let stdin = io::stdin();
+                let reader = stdin.lock();
+                self.process(reader);
+            }
+            Input::File(name) => {
+                unimplemented!();
+            }
+            Input::Buffer(buffer) => {
+                unimplemented!();
+            }
+        }
+
+        self
+    }
+
+    pub fn process(&mut self, mut reader: impl io::BufRead) {
+        match self.output {
+            Output::Buffer(ref mut buffer) => {
+                reader.read_line(buffer);
+            }
+            _ => unimplemented!(),
+        }
     }
 }
 
