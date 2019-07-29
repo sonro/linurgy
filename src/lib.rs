@@ -183,8 +183,25 @@ mod tests {
     #[test]
     fn editor_add_line() {
         let mut ed = Editor::default();
-        let line = String::from("This is a line of test text\n");
+
+        let line = String::from("test text\n");
         ed.add_line(line);
-        assert_eq!("This is a line of test text\n", ed.buffer);
+        assert_eq!("test text\n", ed.buffer);
+        assert_eq!(0, ed.current_count);
+
+        let line = String::from(" more\n");
+        ed.add_line(line);
+        assert_eq!("test text\n more\n", ed.buffer);
+        assert_eq!(0, ed.current_count);
+
+        let line = String::from("\n");
+        ed.add_line(line);
+        assert_eq!("test text\n more\n\n", ed.buffer);
+        assert_eq!(1, ed.current_count);
+
+        let line = String::from("\n");
+        ed.add_line(line);
+        assert_eq!("test text\n more\n\n\n-------\n", ed.buffer);
+        assert_eq!(0, ed.current_count);
     }
 }
