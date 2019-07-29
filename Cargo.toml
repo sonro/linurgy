@@ -3,7 +3,16 @@ name = "linurgy"
 version = "0.1.0"
 authors = ["Christopher Morton <sonro@gmx.com>"]
 edition = "2018"
+description = """
+Manipulate the output of multiple newlines.
+Replace/Insert/Append newlines with any string.
+Input and output from stdio/files/buffers.
+"""
+repository = "https://github.com/sonro/linurgy"
+license = "MIT"
+readme = "README.md"
+keywords = ["line", "newline", "text-editing", "stream-editing"]
+categories = ["parsing"]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
+[badges]
+maintenance = { status = "actively-developed" }
