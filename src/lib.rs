@@ -375,6 +375,13 @@ mod tests {
 
     #[test]
     fn linurgy_run() {
+        let input = String::from("test\nlines\n");
+        let mut output = String::new();
+        let mut lb = LinurgyBuilder::new();
+        lb.add_input(Input::Buffer(&input));
+        lb.add_output(Output::Buffer(&mut output));
+        lb.run();
+        assert_eq!("test\nlines\n", &output);
     }
 
 }
