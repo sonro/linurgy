@@ -106,6 +106,9 @@ impl Editor {
                     }
                 }
             }
+        } else {
+            // line contains text
+            self.current_count = 0;
         }
     }
 
