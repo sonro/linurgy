@@ -143,7 +143,7 @@ impl<'a, 'b> LinurgyBuilder<'a, 'b> {
         self
     }
 
-    pub fn process(&mut self, reader: impl io::BufRead) {
+    fn process(&mut self, reader: impl io::BufRead) {
         let mut buffer = String::new();
 
         for line in reader.lines() {
