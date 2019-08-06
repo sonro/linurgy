@@ -5,11 +5,11 @@ fn main() {
     let mut buffer = String::new();
 
     LinurgyBuilder::new()
-        .add_input(Input::Buffer(&input))
-        .add_newline_trigger(1)
-        .add_new_text(String::from("FOO"))
-        .add_edit_type(EditType::Replace)
-        .add_output(Output::Buffer(&mut buffer))
+        .set_input(Input::Buffer(&input))
+        .set_newline_trigger(1)
+        .set_new_text(String::from("FOO"))
+        .set_edit_type(EditType::Replace)
+        .set_output(Output::Buffer(&mut buffer))
         .run();
 
     print!("{}", buffer);

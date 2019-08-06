@@ -5,8 +5,8 @@ fn main() {
     let mut buffer = String::new();
 
     LinurgyBuilder::new()
-        .add_input(Input::Buffer(&input))
-        .add_output(Output::Buffer(&mut buffer))
+        .set_input(Input::Buffer(&input))
+        .set_output(Output::Buffer(&mut buffer))
         .run();
 
     print!("{}", buffer);
