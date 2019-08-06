@@ -1,21 +1,71 @@
+//! `linurgy` provides an interface for manipulating multiple newlines in text.
+//! Interaction with this library happens through 
+//! [`LinurgyBuilder`](struct.LinurgyBuilder.html).
+//!
+//! # Examples
+//!
+//! Read stdin and for each empty line, append an extra line to stdout.
+//! ```rust
+//! # use linurgy::LinurgyBuilder;
+//! LinurgyBuilder::new()
+//!     .set_newline_trigger(1)
+//!     .set_new_text(String::from("\n"))
+//!     .run();
+//! ```
+//! 
+//! Read from one buffer, remove all empty lines, and output to another buffer.
+//! ```rust
+//! # use linurgy::{LinurgyBuilder, Input, Output, EditType};
+//! let input = String::from("Remove\n\nEvery\n\nEmpty\n\nLine\n");
+//! let mut output = String::new();
+//! 
+//! LinurgyBuilder::new()
+//!     .set_input(Input::Buffer(&input))
+//!     .set_output(Output::Buffer(&mut output))
+//!     .set_newline_trigger(1)
+//!     .set_edit_type(EditType::Replace)
+//!     .set_new_text(String::from(""))
+//!     .run();
+//! 
+//! assert_eq!("Remove\nEvery\nEmpty\nLine\n", &output);
+//! ```
+
 use std::io::{self, Write};
 use std::fs;
 
+/// Type of input stream to edit
 pub enum Input<'a> {
+    /// Basic line by line read from stdin
     StdIn,
+
+    /// Read from a given filename
     File(String),
+
+    /// Read from a string
     Buffer(&'a str),
 }
 
+/// Type of output stream to write edits to
 pub enum Output<'b> {
+    /// Basic line by line output to stdout
     StdOut,
+
+    /// Write to a given filename
     File(String),
+
+    /// Write to a given `String` buffer
     Buffer(&'b mut String),
 }
 
+/// Which action to implement when editing newlines
 pub enum EditType {
+    /// New edits will appear after newlines
     Append,
+
+    /// New edits will appear before newlines
     Insert,
+
+    /// New edits will appear instead of newlines
     Replace,
 }
 
@@ -76,6 +126,11 @@ impl Editor {
     }
 }
 
+/// Use this to prepare and execute linurgy editing on a stream.
+///
+/// A linurgy consists of an [`Input`](enum.Input.html), which will be read
+/// line by line, edited by user defined rules, and then streamed into an
+/// [`Output`](enum.Output.html).
 pub struct LinurgyBuilder<'a, 'b> {
     input:  Input<'a>,
     output: Output<'b>,
@@ -93,35 +148,140 @@ impl Default for LinurgyBuilder<'_, '_> {
 }
 
 impl<'a, 'b> LinurgyBuilder<'a, 'b> {
+    /// Instantiate a new builder with default values.
+    /// - Input: [`Input::StdIn`](enum.Input.html#variant.StdIn),
+    /// - Output: [`Output::StdOut`](enum.Input.html#variant.StdOut),
+    /// - Newline count trigger: 2,
+    /// - New text : "-------\n",
+    /// - EditType: [`EditType::Append`](enum.EditType.html#variant.Append)
+    ///
+    /// This will read from `stdin`,
+    /// add dashes after 2 empty lines, and write to `stdout`.
     pub fn new() -> Self {
         Self::default()
     }
 
+    /// Set the input source to read text from.
+    ///
+    /// # Examples
+    /// Using an in-memory [`Buffer`](enum.Input.html#variant.Buffer)
+    /// ```rust
+    /// # use linurgy::{LinurgyBuilder, Input};
+    /// let text = String::from("Sample text\n\n\n");
+    /// let mut linurgy = LinurgyBuilder::new();
+    ///
+    /// linurgy.set_input(Input::Buffer(&text));
+    /// ```
+    /// Read from a [`File`](enum.Input.html#variant.File)
+    /// ```rust
+    /// # use linurgy::{LinurgyBuilder, Input};
+    /// let filename = String::from("filename.txt");
+    /// let mut linurgy = LinurgyBuilder::new();
+    /// 
+    /// linurgy.set_input(Input::File(filename));
+    /// ```
     pub fn set_input(&mut self, input: Input<'a>) -> &mut Self {
         self.input = input;
         self
     }
 
+    /// Set the output stream to write to.
+    ///
+    /// # Examples
+    /// Using an in-memory [`Buffer`](enum.Output.html#variant.Buffer)
+    /// ```rust
+    /// # use linurgy::{LinurgyBuilder, Output};
+    /// let mut buffer = String::new();
+    /// let mut linurgy = LinurgyBuilder::new();
+    ///
+    /// linurgy.set_output(Output::Buffer(&mut buffer));
+    /// ```
+    /// Write straight to a [`File`](enum.Output.html#variant.File)
+    /// ```rust
+    /// # use linurgy::{LinurgyBuilder, Output};
+    /// let filename = String::from("filename.txt");
+    /// let mut linurgy = LinurgyBuilder::new();
+    /// 
+    /// linurgy.set_output(Output::File(filename));
+    /// ```
     pub fn set_output(&mut self, output: Output<'b>) -> &mut Self {
         self.output = output;
         self
     }
 
+    /// Set the newline count to trigger editing.
+    ///
+    /// # Example
+    /// Add edit string after every 5 empty lines
+    /// ```rust
+    /// # use linurgy::{LinurgyBuilder};
+    /// let mut linurgy = LinurgyBuilder::new();
+    /// linurgy.set_newline_trigger(5);
+    /// ```
     pub fn set_newline_trigger(&mut self, count: u8) -> &mut Self {
         self.editor.newline_count_trigger = count;
         self
     }
 
+    /// Set the text that will be used when the newline trigger is reached.
+    ///
+    /// # Example
+    /// Add a line of dots after every empty line
+    /// ```rust
+    /// # use linurgy::{LinurgyBuilder};
+    /// let mut linurgy = LinurgyBuilder::new();
+    /// linurgy.set_newline_trigger(1);
+    /// linurgy.set_new_text(
+    ///     format!("{}\n", ". ".repeat(25))
+    /// );
+    /// ```
     pub fn set_new_text(&mut self, new_text: String) -> &mut Self {
         self.editor.new_text = new_text;
         self
     }
 
+    /// Set how new text is added after the newline trigger is reached.
+    ///
+    /// # Example
+    /// Replace double empty lines with a line of dashes
+    /// ```rust
+    /// # use linurgy::{LinurgyBuilder, EditType};
+    /// let mut linurgy = LinurgyBuilder::new();
+    /// linurgy.set_edit_type(EditType::Replace);
+    /// ```
     pub fn set_edit_type(&mut self, edit_type: EditType) -> &mut Self {
         self.editor.edit_type = edit_type;
         self
     }
 
+    /// Execute the linurgy edits on the specified input stream.
+    ///
+    /// This function will block until the input stream is exhausted.
+    /// If the input stream is [`Input::StdIn`](enum.Input.html#varient.StdIn),
+    /// then `stdin` will be locked while this function runs.
+    /// If `stdin` is locked elsewhere, this function will block until it
+    /// becomes available again.
+    ///
+    /// # Panics
+    /// This function will panic if the input file in unable to be opened
+    /// or read from, 
+    /// or if the output file is unable to be created or written to.
+    ///
+    /// # Examples
+    /// Execute default behaviour and add dashes to 
+    /// double newlines from `stdin`
+    /// ```rust
+    /// # use linurgy::LinurgyBuilder;
+    /// LinurgyBuilder::new().run();
+    /// ```
+    ///
+    /// This will panic if "not-a-file" does not a exist
+    /// ```rust,should_panic
+    /// # use linurgy::{LinurgyBuilder, Input};
+    /// LinurgyBuilder::new()
+    ///     .set_input(Input::File(String::from("not-a-file")))
+    ///     .run();
+    /// ```
     pub fn run(&mut self) -> &mut Self {
         match self.input {
             Input::StdIn => {
