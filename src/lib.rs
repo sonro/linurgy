@@ -19,7 +19,7 @@ pub enum EditType {
     Replace,
 }
 
-pub struct Editor {
+struct Editor {
     newline_count_trigger: u8,
     new_text: String,
     edit_type: EditType,
