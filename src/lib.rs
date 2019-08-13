@@ -9,7 +9,7 @@
 //! # use linurgy::LinurgyBuilder;
 //! LinurgyBuilder::new()
 //!     .set_newline_trigger(1)
-//!     .set_new_text(String::from("\n"))
+//!     .set_new_text("\n")
 //!     .run();
 //! ```
 //! 
@@ -24,7 +24,7 @@
 //!     .set_output(Output::Buffer(&mut output))
 //!     .set_newline_trigger(1)
 //!     .set_edit_type(EditType::Replace)
-//!     .set_new_text(String::from(""))
+//!     .set_new_text("")
 //!     .run();
 //! 
 //! assert_eq!("Remove\nEvery\nEmpty\nLine\n", &output);
@@ -69,19 +69,19 @@ pub enum EditType {
     Replace,
 }
 
-struct Editor {
+struct Editor<'c> {
     newline_count_trigger: u8,
-    new_text: String,
+    new_text: &'c str,
     edit_type: EditType,
     current_count: u8,
     buffer: String
 }
 
-impl Default for Editor {
+impl<'c> Default for Editor<'c> {
     fn default() -> Self {
         Editor {
             newline_count_trigger: 2,
-            new_text: String::from("-------\n"),
+            new_text: "-------\n",
             edit_type: EditType::Append,
             current_count: 0,
             buffer: String::new(),
@@ -89,7 +89,7 @@ impl Default for Editor {
     }
 }
 
-impl Editor {
+impl<'c> Editor<'c> {
     fn add_line(&mut self, line: &str) {
         self.buffer += line;
         if line == "\n" {
@@ -97,12 +97,12 @@ impl Editor {
             if self.current_count == self.newline_count_trigger {
                 self.current_count = 0;
                 match &self.edit_type {
-                    EditType::Append => self.buffer += &self.new_text,
+                    EditType::Append => self.buffer += self.new_text,
                     EditType::Insert => {
-                        self.buffer.insert_str(0, &self.new_text);
+                        self.buffer.insert_str(0, self.new_text);
                     }
                     EditType::Replace => {
-                        self.buffer.replace_range(.., &self.new_text);
+                        self.buffer.replace_range(.., self.new_text);
                     }
                 }
             }
@@ -134,13 +134,13 @@ impl Editor {
 /// A linurgy consists of an [`Input`](enum.Input.html), which will be read
 /// line by line, edited by user defined rules, and then streamed into an
 /// [`Output`](enum.Output.html).
-pub struct LinurgyBuilder<'a, 'b> {
+pub struct LinurgyBuilder<'a, 'b, 'c> {
     input:  Input<'a>,
     output: Output<'b>,
-    editor: Editor,
+    editor: Editor<'c>,
 }
 
-impl Default for LinurgyBuilder<'_, '_> {
+impl Default for LinurgyBuilder<'_, '_, '_> {
     fn default() -> Self {
         LinurgyBuilder {
             input: Input::StdIn,
@@ -150,7 +150,7 @@ impl Default for LinurgyBuilder<'_, '_> {
     }
 }
 
-impl<'a, 'b> LinurgyBuilder<'a, 'b> {
+impl<'a, 'b, 'c> LinurgyBuilder<'a, 'b, 'c> {
     /// Instantiate a new builder with default values.
     /// - Input: [`Input::StdIn`](enum.Input.html#variant.StdIn),
     /// - Output: [`Output::StdOut`](enum.Output.html#variant.StdOut),
@@ -233,12 +233,12 @@ impl<'a, 'b> LinurgyBuilder<'a, 'b> {
     /// ```rust
     /// # use linurgy::{LinurgyBuilder};
     /// let mut linurgy = LinurgyBuilder::new();
+    /// let new_text = format!("{}\n", ". ".repeat(25));
+    /// 
     /// linurgy.set_newline_trigger(1);
-    /// linurgy.set_new_text(
-    ///     format!("{}\n", ". ".repeat(25))
-    /// );
+    /// linurgy.set_new_text(&new_text);
     /// ```
-    pub fn set_new_text(&mut self, new_text: String) -> &mut Self {
+    pub fn set_new_text(&mut self, new_text: &'c str) -> &mut Self {
         self.editor.new_text = new_text;
         self
     }
@@ -440,7 +440,7 @@ mod tests {
     fn linurgy_set_new_text() {
         let mut lb = LinurgyBuilder::new();
         
-        lb.set_new_text(String::from("cheese"));
+        lb.set_new_text("cheese");
         assert_eq!("cheese", lb.editor.new_text);
     }
 
