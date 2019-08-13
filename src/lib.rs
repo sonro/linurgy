@@ -515,6 +515,35 @@ mod tests {
     }
 
     #[test]
+    fn linurgy_write() {
+        let mut output = String::new();
+        let mut lb = LinurgyBuilder::new();
+        lb.set_output(Output::Buffer(&mut output));
+
+        let test_line = None;
+        lb.write(test_line);
+        assert_eq!("", output);
+
+        let mut output = String::new();
+        let mut lb = LinurgyBuilder::new();
+        lb.set_output(Output::Buffer(&mut output));
+
+        let test_line = Some(String::from("testline\n"));
+        lb.write(test_line);
+        assert_eq!("testline\n", output);
+
+        let mut output = String::new();
+        let mut lb = LinurgyBuilder::new();
+        lb.set_output(Output::Buffer(&mut output));
+
+        let test_line = Some(String::from("testline\n"));
+        lb.write(test_line);
+        let test_line = Some(String::from("testline\n"));
+        lb.write(test_line);
+        assert_eq!("testline\ntestline\n", output);
+    }
+
+    #[test]
     fn linurgy_process() {
         let mut output = String::new();
         let mut lb = LinurgyBuilder::new();
