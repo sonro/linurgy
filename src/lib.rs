@@ -138,6 +138,7 @@ pub struct LinurgyBuilder<'a, 'b, 'c> {
     input:  Input<'a>,
     output: Output<'b>,
     editor: Editor<'c>,
+    file: Option<fs::File>,
 }
 
 impl Default for LinurgyBuilder<'_, '_, '_> {
@@ -146,6 +147,7 @@ impl Default for LinurgyBuilder<'_, '_, '_> {
             input: Input::StdIn,
             output: Output::StdOut,
             editor: Editor::default(),
+            file: None,
         }
     }
 }
@@ -276,7 +278,7 @@ impl<'a, 'b, 'c> LinurgyBuilder<'a, 'b, 'c> {
     /// LinurgyBuilder::new().run();
     /// ```
     ///
-    /// This will panic if "not-a-file" does not a exist
+    /// This will panic if "not-a-file" does not exist
     /// ```rust,should_panic
     /// # use linurgy::{LinurgyBuilder, Input};
     /// LinurgyBuilder::new()
@@ -284,6 +286,10 @@ impl<'a, 'b, 'c> LinurgyBuilder<'a, 'b, 'c> {
     ///     .run();
     /// ```
     pub fn run(&mut self) -> &mut Self {
+        if let Output::File(path) = &self.output {
+            self.file = Some(fs::File::create(path).expect("Create file"))
+        }
+
         match self.input {
             Input::StdIn => {
                 let stdin = io::stdin();
@@ -305,37 +311,29 @@ impl<'a, 'b, 'c> LinurgyBuilder<'a, 'b, 'c> {
     }
 
     fn process(&mut self, reader: impl io::BufRead) {
-        let mut buffer = String::new();
-
         for line in reader.lines() {
             let line = line.unwrap() + "\n";
             self.editor.add_line(&line);
-            if let Some(edited) = self.editor.try_output() {
-                match self.output {
-                    Output::StdOut => print!("{}", &edited),
-                    _ => buffer += &edited,
-                }
-            }
+            let edited_text = self.editor.try_output();
+            self.write(edited_text);
         }
 
-        if let Some(edited) = self.editor.get_remaining_output() {
+        let edited_text = self.editor.get_remaining_output();
+        self.write(edited_text);
+    }
+
+    fn write(&mut self, edited_text: Option<String>) {
+        if let Some(text) = edited_text {
             match self.output {
-                Output::StdOut => print!("{}", &edited),
-                _ => buffer += &edited,
+                Output::StdOut => print!("{}", &text),
+                Output::File(_) => {
+                    if let Some(file) = &mut self.file {
+                        file.write_all(&text.as_bytes())
+                            .expect("Write to file")
+                    }
+                }
+                Output::Buffer(ref mut buffer) => buffer.push_str(&text),
             }
-        }
-
-        match self.output {
-            Output::File(name) => {
-                let mut file = fs::File::create(name)
-                    .expect("Unable to create file");
-                file.write_all(buffer.as_bytes())
-                    .expect("unable to write to file");
-            }
-            Output::Buffer(ref mut buf) => {
-                buf.push_str(&buffer);
-            }
-            _ => (),
         }
     }
 }
