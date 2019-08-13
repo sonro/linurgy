@@ -39,7 +39,7 @@ pub enum Input<'a> {
     StdIn,
 
     /// Read from a given filename
-    File(String),
+    File(&'a str),
 
     /// Read from a string
     Buffer(&'a str),
@@ -51,7 +51,7 @@ pub enum Output<'b> {
     StdOut,
 
     /// Write to a given filename
-    File(String),
+    File(&'b str),
 
     /// Write to a given `String` buffer
     Buffer(&'b mut String),
@@ -178,10 +178,9 @@ impl<'a, 'b, 'c> LinurgyBuilder<'a, 'b, 'c> {
     /// Read from a [`File`](enum.Input.html#variant.File)
     /// ```rust
     /// # use linurgy::{LinurgyBuilder, Input};
-    /// let filename = String::from("filename.txt");
     /// let mut linurgy = LinurgyBuilder::new();
     /// 
-    /// linurgy.set_input(Input::File(filename));
+    /// linurgy.set_input(Input::File("filename.txt"));
     /// ```
     pub fn set_input(&mut self, input: Input<'a>) -> &mut Self {
         self.input = input;
@@ -202,10 +201,9 @@ impl<'a, 'b, 'c> LinurgyBuilder<'a, 'b, 'c> {
     /// Write straight to a [`File`](enum.Output.html#variant.File)
     /// ```rust
     /// # use linurgy::{LinurgyBuilder, Output};
-    /// let filename = String::from("filename.txt");
     /// let mut linurgy = LinurgyBuilder::new();
     /// 
-    /// linurgy.set_output(Output::File(filename));
+    /// linurgy.set_output(Output::File("filename.txt"));
     /// ```
     pub fn set_output(&mut self, output: Output<'b>) -> &mut Self {
         self.output = output;
@@ -282,7 +280,7 @@ impl<'a, 'b, 'c> LinurgyBuilder<'a, 'b, 'c> {
     /// ```rust,should_panic
     /// # use linurgy::{LinurgyBuilder, Input};
     /// LinurgyBuilder::new()
-    ///     .set_input(Input::File(String::from("not-a-file")))
+    ///     .set_input(Input::File("not-a-file"))
     ///     .run();
     /// ```
     pub fn run(&mut self) -> &mut Self {
@@ -292,7 +290,7 @@ impl<'a, 'b, 'c> LinurgyBuilder<'a, 'b, 'c> {
                 let reader = stdin.lock();
                 self.process(reader);
             }
-            Input::File(ref name) => {
+            Input::File(name) => {
                 let file = fs::File::open(name).expect("Unable to open file");
                 let reader = io::BufReader::new(file);
                 self.process(reader);
@@ -328,7 +326,7 @@ impl<'a, 'b, 'c> LinurgyBuilder<'a, 'b, 'c> {
         }
 
         match self.output {
-            Output::File(ref name) => {
+            Output::File(name) => {
                 let mut file = fs::File::create(name)
                     .expect("Unable to create file");
                 file.write_all(buffer.as_bytes())
@@ -390,9 +388,9 @@ mod tests {
             _ => assert!(false, "Correct type not implemented"),
         }
         
-        lb.set_input(Input::File(String::from("filename")));
+        lb.set_input(Input::File("filename"));
         match lb.input {
-            Input::File(ref text) => assert_eq!("filename", text),
+            Input::File(text) => assert_eq!("filename", text),
             _ => assert!(false, "Correct type not implemented"),
         }
 
@@ -415,9 +413,9 @@ mod tests {
             _ => assert!(false, "Correct type not implemented"),
         }
         
-        lb.set_output(Output::File(String::from("filename")));
+        lb.set_output(Output::File("filename"));
         match lb.output {
-            Output::File(ref text) => assert_eq!("filename", text),
+            Output::File(text) => assert_eq!("filename", text),
             _ => assert!(false, "Correct type not implemented"),
         }
 
