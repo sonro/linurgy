@@ -153,7 +153,7 @@ impl Default for LinurgyBuilder<'_, '_> {
 impl<'a, 'b> LinurgyBuilder<'a, 'b> {
     /// Instantiate a new builder with default values.
     /// - Input: [`Input::StdIn`](enum.Input.html#variant.StdIn),
-    /// - Output: [`Output::StdOut`](enum.Input.html#variant.StdOut),
+    /// - Output: [`Output::StdOut`](enum.Output.html#variant.StdOut),
     /// - Newline count trigger: 2,
     /// - New text : "-------\n",
     /// - EditType: [`EditType::Append`](enum.EditType.html#variant.Append)
