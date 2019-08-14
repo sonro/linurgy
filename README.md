@@ -33,7 +33,7 @@ LinurgyBuilder::new()
     .set_output(Output::Buffer(&mut output))
     .set_newline_trigger(1)
     .set_edit_type(EditType::Replace)
-    .set_new_text(String::from(""))
+    .set_new_text("")
     .run();
 
 assert_eq!("Remove\nEvery\nEmpty\nLine\n", &output);
