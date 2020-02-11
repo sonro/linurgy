@@ -22,9 +22,9 @@
 //! LinurgyBuilder::new()
 //!     .set_input(Input::Buffer(&input))
 //!     .set_output(Output::Buffer(&mut output))
-//!     .set_newline_trigger(1)
+//!     .set_newline_trigger(2)
 //!     .set_edit_type(EditType::Replace)
-//!     .set_new_text("")
+//!     .set_new_text("\n")
 //!     .run();
 //! 
 //! assert_eq!("Remove\nEvery\nEmpty\nLine\n", &output);
