@@ -34,6 +34,7 @@ use std::fs;
 use std::io::{self, Write};
 
 /// Type of input stream to edit
+#[derive(PartialEq, Debug)]
 pub enum Input<'a> {
     /// Basic line by line read from stdin
     StdIn,
@@ -46,6 +47,7 @@ pub enum Input<'a> {
 }
 
 /// Type of output stream to write edits to
+#[derive(PartialEq, Debug)]
 pub enum Output<'b> {
     /// Basic line by line output to stdout
     StdOut,
@@ -58,6 +60,7 @@ pub enum Output<'b> {
 }
 
 /// Which action to implement when editing newlines
+#[derive(PartialEq, Debug)]
 pub enum EditType {
     /// New edits will appear after newlines
     Append,
@@ -69,75 +72,18 @@ pub enum EditType {
     Replace,
 }
 
-struct Editor<'c> {
-    newline_count_trigger: u8,
-    new_text: &'c str,
-    edit_type: EditType,
-    current_count: u8,
-    buffer: String,
-}
-
-impl<'c> Default for Editor<'c> {
-    fn default() -> Self {
-        Editor {
-            newline_count_trigger: 2,
-            new_text: "-------\n",
-            edit_type: EditType::Append,
-            current_count: 0,
-            buffer: String::new(),
-        }
-    }
-}
-
-impl<'c> Editor<'c> {
-    fn add_line(&mut self, line: &str) {
-        self.buffer += line;
-        if line == "\n" {
-            self.current_count += 1;
-            if self.current_count == self.newline_count_trigger {
-                self.current_count = 0;
-                match &self.edit_type {
-                    EditType::Append => self.buffer += self.new_text,
-                    EditType::Insert => {
-                        self.buffer.insert_str(0, self.new_text);
-                    }
-                    EditType::Replace => {
-                        self.buffer.replace_range(.., self.new_text);
-                    }
-                }
-            }
-        } else {
-            // line contains text
-            self.current_count = 0;
-        }
-    }
-
-    fn try_output(&mut self) -> Option<String> {
-        if self.current_count == 0 {
-            Some(self.buffer.drain(..).collect())
-        } else {
-            None
-        }
-    }
-
-    fn get_remaining_output(&mut self) -> Option<String> {
-        if !self.buffer.is_empty() {
-            Some(self.buffer.drain(..).collect())
-        } else {
-            None
-        }
-    }
-}
-
 /// Use this to prepare and execute linurgy editing on a stream.
 ///
 /// A linurgy consists of an [`Input`](enum.Input.html), which will be read
 /// line by line, edited by user defined rules, and then streamed into an
 /// [`Output`](enum.Output.html).
+#[derive(Debug)]
 pub struct LinurgyBuilder<'a, 'b, 'c> {
     input: Input<'a>,
     output: Output<'b>,
-    editor: Editor<'c>,
+    newline_count_trigger: u8,
+    new_text: &'c str,
+    edit_type: EditType,
     file: Option<fs::File>,
 }
 
@@ -146,7 +92,9 @@ impl Default for LinurgyBuilder<'_, '_, '_> {
         LinurgyBuilder {
             input: Input::StdIn,
             output: Output::StdOut,
-            editor: Editor::default(),
+            newline_count_trigger: 2,
+            new_text: "-------\n",
+            edit_type: EditType::Append,
             file: None,
         }
     }
@@ -222,7 +170,7 @@ impl<'a, 'b, 'c> LinurgyBuilder<'a, 'b, 'c> {
     /// linurgy.set_newline_trigger(5);
     /// ```
     pub fn set_newline_trigger(&mut self, count: u8) -> &mut Self {
-        self.editor.newline_count_trigger = count;
+        self.newline_count_trigger = count;
         self
     }
 
@@ -239,7 +187,7 @@ impl<'a, 'b, 'c> LinurgyBuilder<'a, 'b, 'c> {
     /// linurgy.set_new_text(&new_text);
     /// ```
     pub fn set_new_text(&mut self, new_text: &'c str) -> &mut Self {
-        self.editor.new_text = new_text;
+        self.new_text = new_text;
         self
     }
 
@@ -253,7 +201,7 @@ impl<'a, 'b, 'c> LinurgyBuilder<'a, 'b, 'c> {
     /// linurgy.set_edit_type(EditType::Replace);
     /// ```
     pub fn set_edit_type(&mut self, edit_type: EditType) -> &mut Self {
-        self.editor.edit_type = edit_type;
+        self.edit_type = edit_type;
         self
     }
 
@@ -326,22 +274,22 @@ impl<'a, 'b, 'c> LinurgyBuilder<'a, 'b, 'c> {
             } else {
                 newlines += 1;
             }
-            if newlines == self.editor.newline_count_trigger {
-                match self.editor.edit_type {
+            if newlines == self.newline_count_trigger {
+                match self.edit_type {
                     EditType::Append => {
                         for i in 0..newlines {
                             buffer += "\n";
                         }
-                        buffer += self.editor.new_text;
+                        buffer += self.new_text;
                     }
                     EditType::Insert => {
-                        buffer += self.editor.new_text;
+                        buffer += self.new_text;
                         for i in 0..newlines {
                             buffer += "\n";
                         }
                     }
                     EditType::Replace => {
-                        buffer += self.editor.new_text;
+                        buffer += self.new_text;
                     }
                 }
                 rollon = false;
@@ -377,36 +325,22 @@ mod tests {
     use super::*;
 
     #[test]
-    fn default_editor() {
-        let editor = Editor::default();
-        assert_eq!(2, editor.newline_count_trigger);
-        assert_eq!(0, editor.current_count);
-        assert_eq!("", editor.buffer);
-        assert_eq!("-------\n", editor.new_text);
-        if let EditType::Append = editor.edit_type {
-            assert!(true);
-        } else {
-            assert!(false, "Correct type not implemented");
-        }
-    }
-
-    #[test]
     fn default_linurgy_builder() {
         let lb = LinurgyBuilder::new();
-        let editor = Editor::default();
-        if let Input::StdIn = lb.input {
-            assert!(true);
-        } else {
-            assert!(false, "Correct type not implemented");
-        }
-
-        if let Output::StdOut = lb.output {
-            assert!(true);
-        } else {
-            assert!(false, "Correct type not implemented");
-        }
-
-        assert_eq!(editor.new_text, lb.editor.new_text);
+        let default = LinurgyBuilder {
+            input: Input::StdIn,
+            output: Output::StdOut,
+            newline_count_trigger: 2,
+            new_text: "-------\n",
+            edit_type: EditType::Append,
+            file: None,
+        };
+        assert_eq!(default.input, lb.input);
+        assert_eq!(default.output, lb.output);
+        assert_eq!(default.newline_count_trigger, lb.newline_count_trigger);
+        assert_eq!(default.new_text, lb.new_text);
+        assert_eq!(default.edit_type, lb.edit_type);
+        assert_eq!(default.file.is_none(), lb.file.is_none());
     }
 
     #[test]
@@ -460,21 +394,21 @@ mod tests {
     fn linurgy_set_newline_trigger() {
         let mut lb = LinurgyBuilder::new();
         lb.set_newline_trigger(5);
-        assert_eq!(5, lb.editor.newline_count_trigger);
+        assert_eq!(5, lb.newline_count_trigger);
     }
 
     #[test]
     fn linurgy_set_new_text() {
         let mut lb = LinurgyBuilder::new();
         lb.set_new_text("cheese");
-        assert_eq!("cheese", lb.editor.new_text);
+        assert_eq!("cheese", lb.new_text);
     }
 
     #[test]
     fn linurgy_set_edit_type() {
         let mut lb = LinurgyBuilder::new();
         lb.set_edit_type(EditType::Insert);
-        if let EditType::Insert = lb.editor.edit_type {
+        if let EditType::Insert = lb.edit_type {
             assert!(true);
         } else {
             assert!(false, "Correct type not implemented");
