@@ -17,7 +17,7 @@ Read stdin and for each empty line, append an extra line to stdout.
 use linurgy::LinurgyBuilder;
 
 LinurgyBuilder::new()
-    .set_newline_trigger(1)
+    .set_newline_trigger(2)
     .set_new_text(String::from("\n"))
     .run();
 ```
