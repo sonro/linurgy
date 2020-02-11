@@ -12,5 +12,5 @@ fn main() {
         .set_output(Output::Buffer(&mut buffer))
         .run();
 
-    print!("{}", buffer);
+    println!("{}", buffer);
 }

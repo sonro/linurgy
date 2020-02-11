@@ -1,20 +1,18 @@
-use std::fs;
 use linurgy::*;
+use std::fs;
 
 fn main() {
     let data = String::from("this\n\nis\n\nfile\n");
     let tmpinfilename = "/tmp/linurgy-test-input-file";
     let tmpoutfilename = "/tmp/linurgy-test-output-file";
     fs::write(tmpinfilename, &data).expect("Write to file");
-    
     println!("Initial file:\n{}", &data);
 
     LinurgyBuilder::new()
         .set_input(Input::File(tmpinfilename))
-        .set_newline_trigger(1)
-        // edit will be similar to Replace as there is no newline in new_text
-        .set_new_text("_-_-_-_-_")
-        .set_edit_type(EditType::Insert)
+        .set_newline_trigger(2)
+        .set_new_text("\n_-_-_-_-_\n")
+        .set_edit_type(EditType::Replace)
         .set_output(Output::File(tmpoutfilename))
         .run();
 
