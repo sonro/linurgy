@@ -351,19 +351,17 @@ mod tests {
         lb.set_input(Input::Buffer(&buffer));
         match lb.input {
             Input::Buffer(text) => assert_eq!(&buffer, text),
-            _ => assert!(false, "Correct type not implemented"),
+            _ => panic!("Correct type not implemented"),
         }
+
         lb.set_input(Input::File("filename"));
         match lb.input {
             Input::File(text) => assert_eq!("filename", text),
-            _ => assert!(false, "Correct type not implemented"),
+            _ => panic!("Correct type not implemented"),
         }
 
         lb.set_input(Input::StdIn);
-        match lb.input {
-            Input::StdIn => assert!(true),
-            _ => assert!(false, "Correct type not implemented"),
-        }
+        assert_eq!(Input::StdIn, lb.input);
     }
 
     #[test]
@@ -375,19 +373,17 @@ mod tests {
         lb.set_output(Output::Buffer(&mut buffer));
         match lb.output {
             Output::Buffer(ref text) => assert_eq!(&&mut buffer2, text),
-            _ => assert!(false, "Correct type not implemented"),
+            _ => panic!("Correct type not implemented"),
         }
+
         lb.set_output(Output::File("filename"));
         match lb.output {
             Output::File(text) => assert_eq!("filename", text),
-            _ => assert!(false, "Correct type not implemented"),
+            _ => panic!("Correct type not implemented"),
         }
 
         lb.set_output(Output::StdOut);
-        match lb.output {
-            Output::StdOut => assert!(true),
-            _ => assert!(false, "Correct type not implemented"),
-        }
+        assert_eq!(Output::StdOut, lb.output);
     }
 
     #[test]
@@ -408,26 +404,28 @@ mod tests {
     fn linurgy_set_edit_type() {
         let mut lb = LinurgyBuilder::new();
         lb.set_edit_type(EditType::Insert);
-        if let EditType::Insert = lb.edit_type {
-            assert!(true);
-        } else {
-            assert!(false, "Correct type not implemented");
-        }
+        assert_eq!(EditType::Insert, lb.edit_type);
+    }
+
+    fn get_testable_linurgy_builder<'a, 'b, 'c>(
+        output: &'b mut String,
+    ) -> LinurgyBuilder<'a, 'b, 'c> {
+        output.clear();
+        let mut lb = LinurgyBuilder::new();
+        lb.set_output(Output::Buffer(output));
+        lb
     }
 
     #[test]
     fn linurgy_write() {
         let mut output = String::new();
-        let mut lb = LinurgyBuilder::new();
-        lb.set_output(Output::Buffer(&mut output));
+        let mut lb = get_testable_linurgy_builder(&mut output);
 
         let test_line = "testline\n";
         lb.write(test_line);
         assert_eq!("testline\n", output);
 
-        let mut output = String::new();
-        let mut lb = LinurgyBuilder::new();
-        lb.set_output(Output::Buffer(&mut output));
+        let mut lb = get_testable_linurgy_builder(&mut output);
 
         let test_line = "testline\n";
         lb.write(test_line);
@@ -438,32 +436,21 @@ mod tests {
 
     #[test]
     fn linurgy_process() {
-        let mut output = String::new();
-        let mut lb = LinurgyBuilder::new();
-        lb.set_output(Output::Buffer(&mut output));
+        fn assert_expected_output_from_input(expected: &str, input: &str) {
+            let mut output = String::new();
+            let mut lb = get_testable_linurgy_builder(&mut output);
+            let input = String::from(input);
+            let reader = io::Cursor::new(&input);
+            lb.process(reader);
+            assert_eq!(expected, &output);
+        }
 
-        let input = String::from("test\nlines\n");
-        let reader = io::Cursor::new(&input);
-        lb.process(reader);
-        assert_eq!("test\nlines\n", &output);
-
-        let mut output = String::new();
-        let mut lb = LinurgyBuilder::new();
-        lb.set_output(Output::Buffer(&mut output));
-
-        let input = String::from("\n\n");
-        let reader = io::Cursor::new(&input);
-        lb.process(reader);
-        assert_eq!("\n\n-------\n", &output);
-
-        let mut output = String::new();
-        let mut lb = LinurgyBuilder::new();
-        lb.set_output(Output::Buffer(&mut output));
-
-        let input = String::from("\n\n test post text\n\n");
-        let reader = io::Cursor::new(&input);
-        lb.process(reader);
-        assert_eq!("\n\n-------\n test post text\n\n-------\n", &output);
+        assert_expected_output_from_input("test\nlines\n", "test\nlines\n");
+        assert_expected_output_from_input("\n\n-------\n", "\n\n");
+        assert_expected_output_from_input(
+            "\n\n-------\n test post text\n\n-------\n",
+            "\n\n test post text\n\n",
+        );
     }
 
     #[test]
