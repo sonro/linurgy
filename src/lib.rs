@@ -311,29 +311,63 @@ impl<'a, 'b, 'c> LinurgyBuilder<'a, 'b, 'c> {
     }
 
     fn process(&mut self, reader: impl io::BufRead) {
+        let mut newlines = 0;
+        let mut buffer = String::new();
+        let mut rollon = false;
+
         for line in reader.lines() {
-            let line = line.unwrap() + "\n";
-            self.editor.add_line(&line);
-            let edited_text = self.editor.try_output();
-            self.write(edited_text);
-        }
-
-        let edited_text = self.editor.get_remaining_output();
-        self.write(edited_text);
-    }
-
-    fn write(&mut self, edited_text: Option<String>) {
-        if let Some(text) = edited_text {
-            match self.output {
-                Output::StdOut => print!("{}", &text),
-                Output::File(_) => {
-                    if let Some(file) = &mut self.file {
-                        file.write_all(&text.as_bytes())
-                            .expect("Write to file")
+            let line = line.unwrap();
+            if line.len() > 0 && line.chars().any(|c| !c.is_whitespace()) {
+                if rollon {
+                    buffer += "\n";
+                }
+                newlines = 1;
+                buffer += &line;
+            } else {
+                newlines += 1;
+            }
+            if newlines == self.editor.newline_count_trigger {
+                match self.editor.edit_type {
+                    EditType::Append => {
+                        for i in 0..newlines {
+                            buffer += "\n";
+                        }
+                        buffer += self.editor.new_text;
+                    }
+                    EditType::Insert => {
+                        buffer += self.editor.new_text;
+                        for i in 0..newlines {
+                            buffer += "\n";
+                        }
+                    }
+                    EditType::Replace => {
+                        buffer += self.editor.new_text;
                     }
                 }
-                Output::Buffer(ref mut buffer) => buffer.push_str(&text),
+                rollon = false;
+                newlines = 0;
+            } else {
+                rollon = true;
             }
+            self.write(&buffer);
+            buffer.clear();
+        }
+
+        if rollon {
+            buffer += "\n";
+            self.write(&buffer);
+        }
+    }
+
+    fn write(&mut self, text: &str) {
+        match self.output {
+            Output::StdOut => print!("{}", &text),
+            Output::File(_) => {
+                if let Some(file) = &mut self.file {
+                    file.write_all(&text.as_bytes()).expect("Write to file")
+                }
+            }
+            Output::Buffer(ref mut buffer) => buffer.push_str(&text),
         }
     }
 }
@@ -385,7 +419,6 @@ mod tests {
             Input::Buffer(text) => assert_eq!(&buffer, text),
             _ => assert!(false, "Correct type not implemented"),
         }
-        
         lb.set_input(Input::File("filename"));
         match lb.input {
             Input::File(text) => assert_eq!("filename", text),
@@ -410,7 +443,6 @@ mod tests {
             Output::Buffer(ref text) => assert_eq!(&&mut buffer2, text),
             _ => assert!(false, "Correct type not implemented"),
         }
-        
         lb.set_output(Output::File("filename"));
         match lb.output {
             Output::File(text) => assert_eq!("filename", text),
@@ -427,7 +459,6 @@ mod tests {
     #[test]
     fn linurgy_set_newline_trigger() {
         let mut lb = LinurgyBuilder::new();
-        
         lb.set_newline_trigger(5);
         assert_eq!(5, lb.editor.newline_count_trigger);
     }
@@ -435,7 +466,6 @@ mod tests {
     #[test]
     fn linurgy_set_new_text() {
         let mut lb = LinurgyBuilder::new();
-        
         lb.set_new_text("cheese");
         assert_eq!("cheese", lb.editor.new_text);
     }
@@ -443,7 +473,6 @@ mod tests {
     #[test]
     fn linurgy_set_edit_type() {
         let mut lb = LinurgyBuilder::new();
-        
         lb.set_edit_type(EditType::Insert);
         if let EditType::Insert = lb.editor.edit_type {
             assert!(true);
@@ -453,82 +482,12 @@ mod tests {
     }
 
     #[test]
-    fn editor_add_line() {
-        let mut ed = Editor::default();
-
-        let line = String::from("test text\n");
-        ed.add_line(&line);
-        assert_eq!("test text\n", ed.buffer);
-        assert_eq!(0, ed.current_count);
-
-        let line = String::from(" more\n");
-        ed.add_line(&line);
-        assert_eq!("test text\n more\n", ed.buffer);
-        assert_eq!(0, ed.current_count);
-
-        let line = String::from("\n");
-        ed.add_line(&line);
-        assert_eq!("test text\n more\n\n", ed.buffer);
-        assert_eq!(1, ed.current_count);
-
-        let line = String::from("\n");
-        ed.add_line(&line);
-        assert_eq!("test text\n more\n\n\n-------\n", ed.buffer);
-        assert_eq!(0, ed.current_count);
-    }
-
-    #[test]
-    fn editor_add_line_with_diff_edit_type() {
-        let mut ed = Editor::default();
-        ed.edit_type = EditType::Insert;
-
-        let line = String::from("\n");
-        ed.add_line(&line);
-        ed.add_line(&line);
-        assert_eq!("-------\n\n\n", ed.buffer);
-
-        let mut ed = Editor::default();
-        ed.edit_type = EditType::Replace;
-
-        let line = String::from("\n");
-        ed.add_line(&line);
-        ed.add_line(&line);
-        assert_eq!("-------\n", ed.buffer);
-    }
-
-    #[test]
-    fn editor_try_output() {
-        let mut ed = Editor::default();
-        assert_eq!(Some(String::from("")), ed.try_output());
-
-        let line = String::from("\n");
-        ed.add_line(&line);
-        assert_eq!(None, ed.try_output());
-
-        ed.add_line(&line);
-        assert_eq!(Some(String::from("\n\n-------\n")), ed.try_output());
-        assert_eq!(Some(String::from("")), ed.try_output());
-
-        let line = String::from("test\n");
-        ed.add_line(&line);
-        assert_eq!(Some(String::from("test\n")), ed.try_output());
-    }
-
-    #[test]
     fn linurgy_write() {
         let mut output = String::new();
         let mut lb = LinurgyBuilder::new();
         lb.set_output(Output::Buffer(&mut output));
 
-        let test_line = None;
-        lb.write(test_line);
-        assert_eq!("", output);
-
-        let mut output = String::new();
-        let mut lb = LinurgyBuilder::new();
-        lb.set_output(Output::Buffer(&mut output));
-
-        let test_line = Some(String::from("testline\n"));
+        let test_line = "testline\n";
         lb.write(test_line);
         assert_eq!("testline\n", output);
 
@@ -536,9 +495,9 @@ mod tests {
         let mut lb = LinurgyBuilder::new();
         lb.set_output(Output::Buffer(&mut output));
 
-        let test_line = Some(String::from("testline\n"));
+        let test_line = "testline\n";
         lb.write(test_line);
-        let test_line = Some(String::from("testline\n"));
+        let test_line = "testline\n";
         lb.write(test_line);
         assert_eq!("testline\ntestline\n", output);
     }
@@ -570,7 +529,7 @@ mod tests {
         let input = String::from("\n\n test post text\n\n");
         let reader = io::Cursor::new(&input);
         lb.process(reader);
-        assert_eq!("\n\n-------\n test post text\n\n", &output);
+        assert_eq!("\n\n-------\n test post text\n\n-------\n", &output);
     }
 
     #[test]
