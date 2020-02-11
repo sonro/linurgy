@@ -1,5 +1,5 @@
 //! `linurgy` provides an interface for manipulating multiple newlines in text.
-//! Interaction with this library happens through 
+//! Interaction with this library happens through
 //! [`LinurgyBuilder`](struct.LinurgyBuilder.html).
 //!
 //! # Examples
@@ -12,13 +12,13 @@
 //!     .set_new_text("\n")
 //!     .run();
 //! ```
-//! 
+//!
 //! Read from one buffer, remove all empty lines, and output to another buffer.
 //! ```rust
 //! # use linurgy::{LinurgyBuilder, Input, Output, EditType};
 //! let input = String::from("Remove\n\nEvery\n\nEmpty\n\nLine\n");
 //! let mut output = String::new();
-//! 
+//!
 //! LinurgyBuilder::new()
 //!     .set_input(Input::Buffer(&input))
 //!     .set_output(Output::Buffer(&mut output))
@@ -26,12 +26,12 @@
 //!     .set_edit_type(EditType::Replace)
 //!     .set_new_text("\n")
 //!     .run();
-//! 
+//!
 //! assert_eq!("Remove\nEvery\nEmpty\nLine\n", &output);
 //! ```
 
-use std::io::{self, Write};
 use std::fs;
+use std::io::{self, Write};
 
 /// Type of input stream to edit
 pub enum Input<'a> {
@@ -74,7 +74,7 @@ struct Editor<'c> {
     new_text: &'c str,
     edit_type: EditType,
     current_count: u8,
-    buffer: String
+    buffer: String,
 }
 
 impl<'c> Default for Editor<'c> {
@@ -135,7 +135,7 @@ impl<'c> Editor<'c> {
 /// line by line, edited by user defined rules, and then streamed into an
 /// [`Output`](enum.Output.html).
 pub struct LinurgyBuilder<'a, 'b, 'c> {
-    input:  Input<'a>,
+    input: Input<'a>,
     output: Output<'b>,
     editor: Editor<'c>,
     file: Option<fs::File>,
@@ -181,7 +181,7 @@ impl<'a, 'b, 'c> LinurgyBuilder<'a, 'b, 'c> {
     /// ```rust
     /// # use linurgy::{LinurgyBuilder, Input};
     /// let mut linurgy = LinurgyBuilder::new();
-    /// 
+    ///
     /// linurgy.set_input(Input::File("filename.txt"));
     /// ```
     pub fn set_input(&mut self, input: Input<'a>) -> &mut Self {
@@ -204,7 +204,7 @@ impl<'a, 'b, 'c> LinurgyBuilder<'a, 'b, 'c> {
     /// ```rust
     /// # use linurgy::{LinurgyBuilder, Output};
     /// let mut linurgy = LinurgyBuilder::new();
-    /// 
+    ///
     /// linurgy.set_output(Output::File("filename.txt"));
     /// ```
     pub fn set_output(&mut self, output: Output<'b>) -> &mut Self {
@@ -234,7 +234,7 @@ impl<'a, 'b, 'c> LinurgyBuilder<'a, 'b, 'c> {
     /// # use linurgy::{LinurgyBuilder};
     /// let mut linurgy = LinurgyBuilder::new();
     /// let new_text = format!("{}\n", ". ".repeat(25));
-    /// 
+    ///
     /// linurgy.set_newline_trigger(1);
     /// linurgy.set_new_text(&new_text);
     /// ```
@@ -267,11 +267,11 @@ impl<'a, 'b, 'c> LinurgyBuilder<'a, 'b, 'c> {
     ///
     /// # Panics
     /// This function will panic if the input file in unable to be opened
-    /// or read from, 
+    /// or read from,
     /// or if the output file is unable to be created or written to.
     ///
     /// # Examples
-    /// Execute default behaviour and add dashes to 
+    /// Execute default behaviour and add dashes to
     /// double newlines from `stdin`
     /// ```rust
     /// # use linurgy::LinurgyBuilder;
