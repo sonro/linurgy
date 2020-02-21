@@ -19,13 +19,13 @@ use linurgy::LinurgyBuilder;
 LinurgyBuilder::new()
     .set_newline_trigger(2)
     .set_new_text(String::from("\n"))
-    .run();
+    .run()?;
 ```
 
 Read from one buffer, remove all empty lines, and output to another buffer.
 
 ```rust
-# use linurgy::{LinurgyBuilder, Input, Output, EditType};
+use linurgy::{LinurgyBuilder, Input, Output, EditType};
 let input = String::from("Remove\n\nEvery\n\nEmpty\n\nLine\n");
 let mut output = String::new();
 
@@ -35,7 +35,7 @@ LinurgyBuilder::new()
     .set_newline_trigger(2)
     .set_edit_type(EditType::Replace)
     .set_new_text("\n")
-    .run();
+    .run()?;
 
 assert_eq!("Remove\nEvery\nEmpty\nLine\n", &output);
 ```

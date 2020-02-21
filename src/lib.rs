@@ -1,3 +1,4 @@
+#![doc(html_root_url = "https://docs.rs/linurgy/0.4.0")]
 //! `linurgy` provides an interface for manipulating multiple newlines in text.
 //! Interaction with this library happens through
 //! [`LinurgyBuilder`](struct.LinurgyBuilder.html).

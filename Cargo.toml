@@ -1,6 +1,6 @@
 [package]
 name = "linurgy"
-version = "0.3.0"
+version = "0.4.0"
 authors = ["Christopher Morton <sonro@gmx.com>"]
 edition = "2018"
 description = """
