@@ -1,7 +1,7 @@
 use linurgy::*;
 use std::fs;
 
-fn main() {
+fn main() -> Result<(), std::io::Error> {
     let data = String::from("this\n\nis\n\nfile\n");
     let tmpinfilename = "/tmp/linurgy-test-input-file";
     let tmpoutfilename = "/tmp/linurgy-test-output-file";
@@ -14,9 +14,11 @@ fn main() {
         .set_new_text("\n_-_-_-_-_\n")
         .set_edit_type(EditType::Replace)
         .set_output(Output::File(tmpoutfilename))
-        .run();
+        .run()?;
 
     let result = fs::read_to_string(tmpoutfilename).expect("Read from file");
 
     println!("Resulting file:\n{}", result);
+
+    Ok(())
 }

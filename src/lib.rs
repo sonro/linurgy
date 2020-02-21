@@ -6,16 +6,23 @@
 //!
 //! Read stdin and for each empty line, append an extra line to stdout.
 //! ```rust
+//! # use std::error::Error;
 //! # use linurgy::LinurgyBuilder;
+//! # fn main() -> Result<(), Box<dyn Error>> {
 //! LinurgyBuilder::new()
 //!     .set_newline_trigger(2)
 //!     .set_new_text("\n")
-//!     .run();
+//!     .run()?;
+//! #
+//! # Ok(())
+//! # }
 //! ```
 //!
 //! Read from one buffer, remove all empty lines, and output to another buffer.
 //! ```rust
+//! # use std::error::Error;
 //! # use linurgy::{LinurgyBuilder, Input, Output, EditType};
+//! # fn main() -> Result<(), Box<dyn Error>> {
 //! let input = String::from("Remove\n\nEvery\n\nEmpty\n\nLine\n");
 //! let mut output = String::new();
 //!
@@ -28,6 +35,9 @@
 //!     .run();
 //!
 //! assert_eq!("Remove\nEvery\nEmpty\nLine\n", &output);
+//! #
+//! # Ok(())
+//! # }
 //! ```
 
 use std::fs;
@@ -215,49 +225,46 @@ impl<'a, 'b, 'c> LinurgyBuilder<'a, 'b, 'c> {
     /// If `stdin` is locked elsewhere, this function will block until it
     /// becomes available again.
     ///
-    /// # Panics
-    /// This function will panic if the input file in unable to be opened
-    /// or read from,
-    /// or if the output file is unable to be created or written to.
-    ///
     /// # Examples
     /// Execute default behaviour and add dashes to
     /// double newlines from `stdin`
     /// ```rust
+    /// # use std::error::Error;
     /// # use linurgy::LinurgyBuilder;
-    /// LinurgyBuilder::new().run();
+    /// # fn main() -> Result<(), Box<dyn Error>> {
+    /// LinurgyBuilder::new().run()?;
+    /// #
+    /// # Ok(())
+    /// # }
     /// ```
     ///
-    /// This will panic if "not-a-file" does not exist
-    /// ```rust,should_panic
-    /// # use linurgy::{LinurgyBuilder, Input};
-    /// LinurgyBuilder::new()
-    ///     .set_input(Input::File("not-a-file"))
-    ///     .run();
-    /// ```
-    pub fn run(&mut self) -> &mut Self {
+    /// # Errors
+    ///
+    /// If this function encounters any form of I/O or other error, an error
+    /// variant will be returned.
+    pub fn run(&mut self) -> Result<(), io::Error> {
         if let Output::File(path) = &self.output {
-            self.file = Some(fs::File::create(path).expect("Create file"))
+            self.file = Some(fs::File::create(path)?)
         }
 
         match self.input {
             Input::StdIn => {
                 let stdin = io::stdin();
                 let reader = stdin.lock();
-                self.process(reader);
+                self.process(reader)?;
             }
             Input::File(name) => {
-                let file = fs::File::open(name).expect("Unable to open file");
+                let file = fs::File::open(name)?;
                 let reader = io::BufReader::new(file);
-                self.process(reader);
+                self.process(reader)?;
             }
             Input::Buffer(buffer) => {
                 let reader = io::Cursor::new(buffer);
-                self.process(reader);
+                self.process(reader)?;
             }
         }
 
-        self
+        Ok(())
     }
 
     fn add_newlines_to_buffer(&mut self, count: u8) {
@@ -266,13 +273,13 @@ impl<'a, 'b, 'c> LinurgyBuilder<'a, 'b, 'c> {
         }
     }
 
-    fn process(&mut self, reader: impl io::BufRead) {
+    fn process(&mut self, reader: impl io::BufRead) -> Result<(), io::Error> {
         let mut newlines = 0;
         let mut rollon = false;
 
         for line in reader.lines() {
-            let line = line.unwrap();
-            if line.len() > 0 && line.chars().any(|c| !c.is_whitespace()) {
+            let line = line?;
+            if !line.is_empty() && line.chars().any(|c| !c.is_whitespace()) {
                 if rollon {
                     self.add_newlines_to_buffer(1);
                 }
@@ -300,33 +307,39 @@ impl<'a, 'b, 'c> LinurgyBuilder<'a, 'b, 'c> {
                 rollon = true;
             }
 
-            self.write();
+            self.write()?;
         }
 
         if rollon {
             self.add_newlines_to_buffer(1);
-            self.write();
+            self.write()?;
         }
+
+        Ok(())
     }
 
-    fn write(&mut self) {
+    fn write(&mut self) -> Result<(), io::Error> {
         match self.output {
             Output::StdOut => print!("{}", self.buffer),
             Output::File(_) => {
                 if let Some(file) = &mut self.file {
-                    file.write_all(self.buffer.as_bytes())
-                        .expect("Write to file")
+                    file.write_all(self.buffer.as_bytes())?
+                } else {
+                    return Err(io::Error::from(io::ErrorKind::NotFound));
                 }
             }
             Output::Buffer(ref mut buffer) => buffer.push_str(&self.buffer),
         }
         self.buffer.clear();
+
+        Ok(())
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    const EXPECT_MSG: &'static str = "should never error";
 
     #[test]
     fn default_linurgy_builder() {
@@ -428,15 +441,15 @@ mod tests {
         let mut lb = get_testable_linurgy_builder(&mut output);
 
         lb.buffer = "testline\n".to_owned();
-        lb.write();
+        lb.write().expect(EXPECT_MSG);
         assert_eq!("testline\n", output);
 
         let mut lb = get_testable_linurgy_builder(&mut output);
 
         lb.buffer = "testline\n".to_owned();
-        lb.write();
+        lb.write().expect(EXPECT_MSG);
         lb.buffer = "testline\n".to_owned();
-        lb.write();
+        lb.write().expect(EXPECT_MSG);
         assert_eq!("testline\ntestline\n", output);
     }
 
@@ -447,7 +460,7 @@ mod tests {
             let mut lb = get_testable_linurgy_builder(&mut output);
             let input = String::from(input);
             let reader = io::Cursor::new(&input);
-            lb.process(reader);
+            lb.process(reader).expect(EXPECT_MSG);
             assert_eq!(expected, &output);
         }
 
@@ -466,7 +479,7 @@ mod tests {
         let mut lb = LinurgyBuilder::new();
         lb.set_input(Input::Buffer(&input));
         lb.set_output(Output::Buffer(&mut output));
-        lb.run();
+        lb.run().expect(EXPECT_MSG);
         assert_eq!("test\nlines\n", &output);
     }
 }

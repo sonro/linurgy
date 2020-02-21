@@ -1,6 +1,6 @@
 use linurgy::*;
 
-fn main() {
+fn main() -> Result<(), std::io::Error> {
     let input = String::from("\nfoo\n\nbar\n\nbaz\n");
     let mut buffer = String::new();
 
@@ -10,7 +10,9 @@ fn main() {
         .set_new_text("FOO")
         .set_edit_type(EditType::Replace)
         .set_output(Output::Buffer(&mut buffer))
-        .run();
+        .run()?;
 
     println!("{}", buffer);
+
+    Ok(())
 }
