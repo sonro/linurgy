@@ -340,7 +340,7 @@ impl<'a, 'b, 'c> LinurgyBuilder<'a, 'b, 'c> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    const EXPECT_MSG: &'static str = "should never error";
+    const EXPECT_MSG: &str = "should never error";
 
     #[test]
     fn default_linurgy_builder() {
