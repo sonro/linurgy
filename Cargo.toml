@@ -13,7 +13,3 @@ license = "MIT"
 readme = "README.md"
 keywords = ["line", "newline", "text-editing", "stream-editing"]
 categories = ["parsing"]
-
-[badges]
-maintenance = { status = "actively-developed" }
-travis-ci = { repository = "sonro/linurgy", branch = "master" }
