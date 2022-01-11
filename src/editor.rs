@@ -3,9 +3,15 @@
 use std::fmt;
 
 mod basic;
+mod buffer;
+#[cfg(test)]
+mod tests;
+
+pub use basic::Editor as BasicEditor;
+pub use buffer::Editor as BufferEditor;
 
 /// Which action to implement when editing
-#[derive(PartialEq, Debug)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum EditType {
     /// New edits will appear after newlines
     Append,
@@ -17,6 +23,7 @@ pub enum EditType {
     Replace,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum NewlineType {
     Lf,
     Crlf,
@@ -37,9 +44,3 @@ impl fmt::Display for NewlineType {
         write!(f, "{}", self.newline_str())
     }
 }
-
-pub struct StreamEditor;
-
-pub struct StdioEditor;
-
-pub struct FileEditor;
