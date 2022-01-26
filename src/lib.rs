@@ -41,8 +41,8 @@
 //! # }
 //! ```
 
-mod builder;
-mod editor;
+pub mod builder;
+pub mod editor;
 
 use std::fs;
 use std::io::{self, Write};

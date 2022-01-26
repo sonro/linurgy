@@ -31,7 +31,7 @@ pub enum NewlineType {
 
 impl NewlineType {
     #[inline]
-    fn newline_str(&self) -> &'static str {
+    pub fn as_str(&self) -> &'static str {
         match self {
             NewlineType::Lf => "\n",
             NewlineType::Crlf => "\r\n",
@@ -41,6 +41,6 @@ impl NewlineType {
 
 impl fmt::Display for NewlineType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.newline_str())
+        write!(f, "{}", self.as_str())
     }
 }
