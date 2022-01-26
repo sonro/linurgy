@@ -1,26 +1,26 @@
 use super::NewlineType;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Editor {
-    replace: String,
+pub struct Editor<'a> {
+    replace: &'a str,
     trigger: u8,
     newline: NewlineType,
 }
 
-impl Default for Editor {
+impl<'a> Default for Editor<'a> {
     /// Will do nothing on `edit`
     fn default() -> Self {
         Editor {
-            replace: String::new(),
+            replace: "",
             trigger: 0,
             newline: NewlineType::Lf,
         }
     }
 }
 
-impl Editor {
+impl<'a> Editor<'a> {
     #[inline]
-    pub fn new(replace: String, trigger: u8, newline: NewlineType) -> Self {
+    pub fn new(replace: &'a str, trigger: u8, newline: NewlineType) -> Self {
         Editor {
             replace,
             trigger,
@@ -80,7 +80,7 @@ impl Editor {
         newlines += 1;
 
         if newlines == self.trigger {
-            output.push_str(&self.replace);
+            output.push_str(self.replace);
             0
         } else {
             newlines
@@ -119,7 +119,7 @@ mod tests {
     }
 
     fn assert_edit(test: &EditTest) {
-        let editor = Editor::new(test.replace.to_string(), test.trigger, test.newline);
+        let editor = Editor::new(test.replace, test.trigger, test.newline);
         assert_eq!(
             test.expected,
             editor.edit(test.input),
