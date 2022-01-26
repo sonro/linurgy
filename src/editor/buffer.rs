@@ -74,17 +74,10 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::editor::tests::{EditTest, EDIT_TESTS};
+    use crate::editor::tests::{editor_tests, EditTest};
     use std::io::{BufReader, Cursor};
 
-    #[test]
-    fn edit() {
-        for test in EDIT_TESTS {
-            assert_edit(test)
-        }
-    }
-
-    fn assert_edit(test: &EditTest) {
+    fn assert_edit(test: EditTest) {
         let mut input = BufReader::new(test.input.as_bytes());
 
         let mut output = Cursor::new(Vec::new());
@@ -105,4 +98,6 @@ mod tests {
 
         assert_eq!(test.expected, actual, "\ntest: {}\n", test.name);
     }
+
+    editor_tests!(assert_edit);
 }
