@@ -1,21 +1,33 @@
-#![allow(dead_code, clippy::derivable_impls)]
 use super::build_macro::impl_common_builder;
 use crate::{
     editor::{BasicEditor, NewlineType},
     EditType,
 };
 
+/// Configures, prepares, and builds [`BasicEditor`].
 #[derive(Debug, PartialEq)]
 pub struct EditorBuilder<'a> {
+    /// Prepared string to replace newlines with.
     replace: String,
+
+    /// Number of newlines to trigger replacement.
     trigger: u8,
+
+    /// Line ending type.
     newline: NewlineType,
+
+    /// Text to replace/insert/append.
     text: &'a str,
+
+    /// Type of edit to make to newlines.
     edit_type: EditType,
+
+    /// Whether this builder has been edited since being prepared.
     dirty: bool,
 }
 
 impl<'a> Default for EditorBuilder<'a> {
+    /// Will build into default BasicEditor.
     fn default() -> Self {
         Self {
             replace: String::new(),
@@ -29,17 +41,38 @@ impl<'a> Default for EditorBuilder<'a> {
 }
 
 impl<'a> EditorBuilder<'a> {
+    /// Creates a new builder with following defaults:
+    ///
+    /// - text: `""`,
+    /// - newline_trigger: `0`,
+    /// - edit_type: `Replace`,
+    ///
+    /// The [`BasicEditor`] made by a unaltered builder will make no changes
+    /// when editing.
+    #[inline]
     pub fn new() -> Self {
         Self::default()
     }
 
+    /// Prepare and build a new [`BasicEditor`] instance.
+    ///
+    /// This is a convenience method for both preparing and building. If you
+    /// are going to be constructing multiple [`BasicEditor`] instances, it
+    /// is recommended to use [`prepare`](Self::prepare) and
+    /// [`build_prepared`](Self::build_prepared) instead.
+    #[inline]
     pub fn build(&mut self) -> BasicEditor {
         if self.dirty {
             self.prepare();
         }
-        BasicEditor::new(&self.replace, self.trigger, self.newline)
+        self.build_prepared()
     }
 
+    /// Build a new [`BasicEditor`] instance.
+    ///
+    /// This method should only be used after [`prepare`](Self::prepare) has
+    /// been called.
+    #[inline]
     pub fn build_prepared(&self) -> BasicEditor {
         BasicEditor::new(&self.replace, self.trigger, self.newline)
     }
