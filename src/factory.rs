@@ -1,4 +1,17 @@
-use crate::{EditType, Editor, NewlineType};
+use crate::{Editor, NewlineType};
+
+/// Which action to implement when editing
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum EditType {
+    /// New edits will appear after newlines
+    Append,
+
+    /// New edits will appear before newlines
+    Insert,
+
+    /// New edits will appear instead of newlines
+    Replace,
+}
 
 /// Create an [`Editor`] that appends text *after* newlines.
 #[inline]

@@ -41,9 +41,10 @@
 //! # }
 //! ```
 
-pub mod editor;
+mod editor;
 pub mod factory;
 mod legacy;
 
-pub use editor::{EditType, Editor, NewlineType};
+pub use editor::{Editor, NewlineType};
+pub use factory::EditType;
 pub use legacy::*;
