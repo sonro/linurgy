@@ -237,6 +237,7 @@ mod tests {
         let expected = Editor::new(String::from("-"), 2, NewlineType::Crlf);
         assert_eq!(expected, editor);
     }
+
     fn blank_editor() -> Editor {
         Editor::new(String::from(""), 0, NewlineType::Lf)
     }
