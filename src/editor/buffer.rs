@@ -10,8 +10,8 @@ where
     O: Write,
 {
     replace: String,
-    trigger: u8,
-    newline: NewlineType,
+    newlines: u8,
+    line_ending: NewlineType,
     input: &'a mut I,
     output: &'a mut O,
 }
@@ -26,7 +26,7 @@ where
         let mut newlines = 0;
         let mut buf = String::with_capacity(BUFSIZE);
 
-        let (newline_len, newline_str) = match self.newline {
+        let (newline_len, newline_str) = match self.line_ending {
             NewlineType::Lf => (1, "\n"),
             NewlineType::Crlf => (2, "\r\n"),
         };
@@ -55,7 +55,7 @@ where
                 }
             }
 
-            if newlines == self.trigger {
+            if newlines == self.newlines {
                 self.output.write_all(self.replace.as_bytes())?;
                 newlines = 0;
             }
@@ -84,8 +84,8 @@ mod tests {
 
         let mut editor = Editor {
             replace: test.replace.to_string(),
-            trigger: test.trigger,
-            newline: test.newline,
+            newlines: test.trigger,
+            line_ending: test.newline,
             input: &mut input,
             output: &mut output,
         };

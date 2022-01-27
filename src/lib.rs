@@ -41,8 +41,11 @@
 //! # }
 //! ```
 
-pub mod builder;
 pub mod editor;
+pub mod factory;
+
+pub use editor::Editor;
+pub use editor::NewlineType;
 
 use std::fs;
 use std::io::{self, Write};

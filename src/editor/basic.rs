@@ -1,36 +1,36 @@
 use super::NewlineType;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Editor<'a> {
-    replace: &'a str,
-    trigger: u8,
-    newline: NewlineType,
+pub struct Editor {
+    replace: String,
+    newlines: u8,
+    line_ending: NewlineType,
 }
 
-impl<'a> Default for Editor<'a> {
+impl Default for Editor {
     /// Will do nothing on `edit`
     fn default() -> Self {
         Editor {
-            replace: "",
-            trigger: 0,
-            newline: NewlineType::Lf,
+            replace: String::new(),
+            newlines: 0,
+            line_ending: NewlineType::Lf,
         }
     }
 }
 
-impl<'a> Editor<'a> {
+impl Editor {
     #[inline]
-    pub fn new(replace: &'a str, trigger: u8, newline: NewlineType) -> Self {
+    pub fn new(replace: String, newlines: u8, line_ending: NewlineType) -> Self {
         Editor {
             replace,
-            trigger,
-            newline,
+            newlines,
+            line_ending,
         }
     }
 
     #[inline]
     pub fn edit(&self, input: &str) -> String {
-        match self.newline {
+        match self.line_ending {
             NewlineType::Lf => self.edit_lf(input),
             NewlineType::Crlf => self.edit_crlf(input),
         }
@@ -79,8 +79,8 @@ impl<'a> Editor<'a> {
     fn handle_newline(&self, output: &mut String, mut newlines: u8) -> u8 {
         newlines += 1;
 
-        if newlines == self.trigger {
-            output.push_str(self.replace);
+        if newlines == self.newlines {
+            output.push_str(&self.replace);
             0
         } else {
             newlines
@@ -112,7 +112,8 @@ mod tests {
     use crate::editor::tests::{editor_tests, EditTest};
 
     fn assert_edit(test: EditTest) {
-        let editor = Editor::new(test.replace, test.trigger, test.newline);
+        let replace = test.replace.to_string();
+        let editor = Editor::new(replace, test.trigger, test.newline);
         assert_eq!(
             test.expected,
             editor.edit(test.input),

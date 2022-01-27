@@ -226,6 +226,18 @@ macro_rules! editor_tests {
                 newline: NewlineType::Crlf,
             });
         }
+
+        #[test]
+        fn replace_dash_every_3_lines() {
+            $assert_fn(EditTest {
+                name: "replace dash every 3 lines",
+                expected: "foo-bar-baz",
+                input: "foo\n\n\nbar\n\n\nbaz",
+                trigger: 3,
+                replace: "-",
+                newline: NewlineType::Lf,
+            });
+        }
     };
 }
 

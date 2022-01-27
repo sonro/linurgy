@@ -7,7 +7,7 @@ mod buffer;
 #[cfg(test)]
 mod tests;
 
-pub use basic::Editor as BasicEditor;
+pub use basic::Editor;
 pub use buffer::Editor as BufferEditor;
 
 /// Which action to implement when editing
