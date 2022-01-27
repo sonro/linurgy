@@ -1,4 +1,7 @@
 use super::NewlineType;
+use std::io::{self, BufRead, Write};
+
+const BUFSIZE: usize = 1024;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Editor {
@@ -34,6 +37,59 @@ impl Editor {
             NewlineType::Lf => self.edit_lf(input),
             NewlineType::Crlf => self.edit_crlf(input),
         }
+    }
+
+    #[inline]
+    pub fn edit_buffered<I, O>(&self, input: &mut I, output: &mut O) -> Result<(), io::Error>
+    where
+        I: BufRead,
+        O: Write,
+    {
+        let mut newlines = 0;
+        let mut buf = String::with_capacity(BUFSIZE);
+
+        let (newline_len, newline_str) = match self.line_ending {
+            NewlineType::Lf => (1, "\n"),
+            NewlineType::Crlf => (2, "\r\n"),
+        };
+
+        loop {
+            buf.clear();
+
+            match input.read_line(&mut buf)? {
+                // EOF
+                0 => break,
+                // newline by itself
+                len if len == newline_len => {
+                    newlines += 1;
+                }
+                // single newline
+                len => {
+                    while newlines > 0 {
+                        output.write_all(newline_str.as_bytes())?;
+                        newlines -= 1;
+                    }
+                    if buf.ends_with('\n') {
+                        newlines += 1;
+                        buf.truncate(len - newline_len);
+                    }
+                    output.write_all(buf.as_bytes())?;
+                }
+            }
+
+            if newlines == self.newlines {
+                output.write_all(self.replace.as_bytes())?;
+                newlines = 0;
+            }
+        }
+
+        // trailing newlines
+        while newlines > 0 {
+            output.write_all(newline_str.as_bytes())?;
+            newlines -= 1;
+        }
+
+        Ok(())
     }
 
     #[inline]
@@ -111,9 +167,12 @@ mod tests {
     use super::*;
     use crate::editor::tests::{editor_tests, EditTest};
 
+    editor_tests!(assert_edit);
+
     fn assert_edit(test: EditTest) {
         let replace = test.replace.to_string();
         let editor = Editor::new(replace, test.newlines, test.line_ending);
+
         assert_eq!(
             test.expected,
             editor.edit(test.input),
@@ -122,5 +181,25 @@ mod tests {
         );
     }
 
-    editor_tests!(assert_edit);
+    mod buffered {
+        use super::*;
+        use std::io::BufReader;
+
+        editor_tests!(assert_edit);
+
+        fn assert_edit_buffered(test: EditTest) {
+            let mut input = BufReader::new(test.input.as_bytes());
+
+            let mut output: Vec<u8> = Vec::new();
+
+            let replace = test.replace.to_string();
+            let editor = Editor::new(replace, test.newlines, test.line_ending);
+
+            editor.edit_buffered(&mut input, &mut output).unwrap();
+
+            let actual = String::from_utf8_lossy(&output);
+
+            assert_eq!(test.expected, actual, "\ntest: {}\n", test.name);
+        }
+    }
 }

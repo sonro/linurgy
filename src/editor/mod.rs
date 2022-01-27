@@ -8,7 +8,7 @@ mod buffer;
 mod tests;
 
 pub use basic::Editor;
-pub use buffer::Editor as BufferEditor;
+pub use buffer::BufEditor;
 
 /// Which action to implement when editing
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

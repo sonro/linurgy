@@ -4,7 +4,7 @@ use std::io::{BufRead, Write};
 const BUFSIZE: usize = 1024;
 
 #[derive(Debug)]
-pub struct Editor<'a, I, O>
+pub struct BufEditor<'i, 'o, I, O>
 where
     I: BufRead,
     O: Write,
@@ -12,11 +12,11 @@ where
     replace: String,
     newlines: u8,
     line_ending: NewlineType,
-    input: &'a mut I,
-    output: &'a mut O,
+    input: &'i mut I,
+    output: &'o mut O,
 }
 
-impl<'a, I, O> Editor<'a, I, O>
+impl<'i, 'o, I, O> BufEditor<'i, 'o, I, O>
 where
     I: BufRead,
     O: Write,
@@ -75,14 +75,14 @@ where
 mod tests {
     use super::*;
     use crate::editor::tests::{editor_tests, EditTest};
-    use std::io::{BufReader, Cursor};
+    use std::io::BufReader;
 
     fn assert_edit(test: EditTest) {
         let mut input = BufReader::new(test.input.as_bytes());
 
-        let mut output = Cursor::new(Vec::new());
+        let mut output: Vec<u8> = Vec::new();
 
-        let mut editor = Editor {
+        let mut editor = BufEditor {
             replace: test.replace.to_string(),
             newlines: test.newlines,
             line_ending: test.line_ending,
@@ -91,8 +91,6 @@ mod tests {
         };
 
         editor.edit().unwrap();
-
-        let output = output.into_inner();
 
         let actual = String::from_utf8_lossy(&output);
 
