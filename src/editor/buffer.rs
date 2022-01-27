@@ -84,8 +84,8 @@ mod tests {
 
         let mut editor = Editor {
             replace: test.replace.to_string(),
-            newlines: test.trigger,
-            line_ending: test.newline,
+            newlines: test.newlines,
+            line_ending: test.line_ending,
             input: &mut input,
             output: &mut output,
         };

@@ -58,17 +58,17 @@ impl Editor {
     #[inline]
     fn edit_crlf(&self, input: &str) -> String {
         let mut output = String::with_capacity(input.len() + self.replace.len());
-        let mut newlines = 0;
+        let mut nl_count = 0;
 
         for c in input.chars() {
-            newlines = match c {
-                '\r' => newlines,
-                '\n' => self.handle_newline(&mut output, newlines),
-                c => self.handle_char_crlf(&mut output, c, newlines),
+            nl_count = match c {
+                '\r' => nl_count,
+                '\n' => self.handle_newline(&mut output, nl_count),
+                c => self.handle_char_crlf(&mut output, c, nl_count),
             }
         }
 
-        for _ in 0..newlines {
+        for _ in 0..nl_count {
             output.push_str("\r\n");
         }
 
@@ -76,20 +76,20 @@ impl Editor {
     }
 
     #[inline(always)]
-    fn handle_newline(&self, output: &mut String, mut newlines: u8) -> u8 {
-        newlines += 1;
+    fn handle_newline(&self, output: &mut String, mut nl_count: u8) -> u8 {
+        nl_count += 1;
 
-        if newlines == self.newlines {
+        if nl_count == self.newlines {
             output.push_str(&self.replace);
             0
         } else {
-            newlines
+            nl_count
         }
     }
 
     #[inline(always)]
-    fn handle_char_lf(&self, output: &mut String, c: char, newlines: u8) -> u8 {
-        for _ in 0..newlines {
+    fn handle_char_lf(&self, output: &mut String, c: char, nl_count: u8) -> u8 {
+        for _ in 0..nl_count {
             output.push('\n');
         }
         output.push(c);
@@ -97,8 +97,8 @@ impl Editor {
     }
 
     #[inline(always)]
-    fn handle_char_crlf(&self, output: &mut String, c: char, newlines: u8) -> u8 {
-        for _ in 0..newlines {
+    fn handle_char_crlf(&self, output: &mut String, c: char, nl_count: u8) -> u8 {
+        for _ in 0..nl_count {
             output.push_str("\r\n");
         }
         output.push(c);
@@ -113,7 +113,7 @@ mod tests {
 
     fn assert_edit(test: EditTest) {
         let replace = test.replace.to_string();
-        let editor = Editor::new(replace, test.trigger, test.newline);
+        let editor = Editor::new(replace, test.newlines, test.line_ending);
         assert_eq!(
             test.expected,
             editor.edit(test.input),
