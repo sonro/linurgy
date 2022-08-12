@@ -64,7 +64,7 @@ editor.edit_buffered(&mut input, &mut stdout())?;
 ```
 
 Add an extra line of dashes to every 2 newlines. Using a [`Cursor`](std::io::Cursor) as input (type
-that implments [`BufReader`](std::io::BufReader)). Output is a [`Vec<u8>`] (type that implements
+that implments [`BufRead`](std::io::BufRead)). Output is a [`Vec<u8>`] (type that implements
 [`Write`](std::io::Write)).
 
 ```rust

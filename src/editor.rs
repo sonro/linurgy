@@ -18,7 +18,7 @@ const BUFSIZE: usize = 1024;
 /// [`String`] containing the edited text.
 ///
 /// Use the [`Editor::edit_buffered`] method to edit a
-/// [`BufReader`](std::io::BufReader) into a [`Write`] output. This is useful
+/// [`BufRead`](std::io::BufRead) into a [`Write`] output. This is useful
 /// for editing files, stdio, or other streams.
 ///
 /// # Newline type
@@ -200,7 +200,7 @@ impl Editor {
 
     /// Edit the input buffer's newlines into the output writer
     ///
-    /// Input types must implement [`BufReader`](std::io::BufReader).
+    /// Input types must implement [`BufRead`](std::io::BufRead).
     /// Output types must implement [`Write`](std::io::Write).
     ///
     /// Text is edited according to how this editor was constructed. Can be
@@ -216,7 +216,7 @@ impl Editor {
     /// # use linurgy::{Editor, NewlineType};
     /// # fn main() -> Result<(), Box<dyn Error>> {
     /// let editor = Editor::new("-".to_string(), 1, NewlineType::Lf);
-    /// // Cursor implements BufReader over a string
+    /// // Cursor implements BufRead over a string
     /// let mut input = Cursor::new("foo\nbar");
     /// let mut output = Vec::new();
     /// editor.edit_buffered(&mut input, &mut output)?;
