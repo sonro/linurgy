@@ -5,11 +5,11 @@ authors = ["Christopher Morton <sonro@gmx.com>"]
 edition = "2018"
 description = """
 Manipulate the output of multiple newlines.
-Replace/Insert/Append newlines with any string.
+Replace/Insert/Append newlines with text.
 Input and output from stdio/files/buffers.
 """
 repository = "https://github.com/sonro/linurgy"
-license = "MIT"
+license = "MIT OR Apache-2.0"
 readme = "README.md"
-keywords = ["line", "newline", "text-editing", "stream-editing"]
-categories = ["parsing"]
+keywords = ["line", "newline", "text", "stream", "ending"]
+categories = ["text-processing"]
