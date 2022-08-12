@@ -3,7 +3,7 @@ use std::fs;
 use std::io::{self, Write};
 
 /// Type of input stream to edit
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Eq, Debug)]
 pub enum Input<'a> {
     /// Basic line by line read from stdin
     StdIn,
@@ -16,7 +16,7 @@ pub enum Input<'a> {
 }
 
 /// Type of output stream to write edits to
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Eq, Debug)]
 pub enum Output<'b> {
     /// Basic line by line output to stdout
     StdOut,
