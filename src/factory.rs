@@ -1,3 +1,7 @@
+//! Convenience functions for creating a configuired [`Editor`].
+//! Variations are based on the desired type of edit: append, insert, or
+//! replace. Each has a [`CRLF`](NewlineType#variant.Crlf) version.
+
 use crate::{Editor, NewlineType};
 
 /// Which action to implement when editing

@@ -119,6 +119,9 @@ const BUFSIZE: usize = 1024;
 /// # }
 /// ```
 ///
+/// # Default
+///
+/// [`Editor::default`] returns an editor which makes no changes to input text.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Editor {
     replace: String,
@@ -126,13 +129,44 @@ pub struct Editor {
     line_ending: NewlineType,
 }
 
+/// The two types of
+/// [newline](https://en.wikipedia.org/wiki/Newline#Issues_with_different_newline_formats)
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum NewlineType {
+    /// Line ending: `\n`
     Lf,
+
+    /// Line ending: `\r\n`
     Crlf,
 }
 
 impl Editor {
+    /// Create a new editor.
+    ///
+    /// - `replace`: string to replace newlines with.
+    /// - `newlines`: number of newlines to trigger the replacement.
+    /// - `line_ending`: type of newline to use.
+    ///
+    /// # Examples
+    ///
+    /// This editor replaces newlines with dashes:
+    ///
+    /// ```rust
+    /// # use linurgy::{Editor, NewlineType};
+    /// let editor = Editor::new("\n-".to_string(), 1, NewlineType::Lf);
+    /// ```
+    ///
+    /// This editor will remove double newlines from CRLF text:
+    ///
+    /// ```rust
+    /// # use linurgy::{Editor, NewlineType};
+    /// let editor = Editor::new("\r\n".to_string(), 2, NewlineType::Crlf);
+    /// ```
+    ///
+    /// # Factory
+    ///
+    /// Users of this library are encouraged to use the [`factory`](crate::factory)
+    /// functions. These provide convient ways to create instances of this type.
     #[inline]
     pub fn new(replace: String, newlines: u8, line_ending: NewlineType) -> Self {
         Editor {
@@ -142,6 +176,20 @@ impl Editor {
         }
     }
 
+    /// Edit the input's newlines.
+    ///
+    /// Produces a [`String`] containing the edited text according to how this
+    /// editor was constructed. Can be used multiple times. The `replace`
+    /// string is used to replace newlines when the `newlines` trigger is met.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use linurgy::{Editor, NewlineType};
+    /// let editor = Editor::new("-".to_string(), 1, NewlineType::Lf);
+    /// let output = editor.edit("foo\nbar");
+    /// assert_eq!("foo-bar", output);
+    /// ```
     #[inline]
     pub fn edit(&self, input: &str) -> String {
         match self.line_ending {
@@ -150,6 +198,29 @@ impl Editor {
         }
     }
 
+    /// Edit the input buffer's newlines into the output buffer.
+    ///
+    /// Text is edited according to how this editor was constructed. Can be
+    /// used multiple times. The `replace` string is used to replace newlines
+    /// when the `newlines` trigger is met.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use std::error::Error;
+    /// # use std::io::Cursor;
+    /// # use std::str::from_utf8;
+    /// # use linurgy::{Editor, NewlineType};
+    /// # fn main() -> Result<(), Box<dyn Error>> {
+    /// let editor = Editor::new("-".to_string(), 1, NewlineType::Lf);
+    /// // Cursor implements BufReader over a string
+    /// let mut input = Cursor::new("foo\nbar");
+    /// let mut output = Vec::new();
+    /// editor.edit_buffered(&mut input, &mut output)?;
+    /// assert_eq!("foo-bar", from_utf8(&output)?);
+    /// # Ok(())
+    /// # }
+    /// ```
     #[inline]
     pub fn edit_buffered<I, O>(&self, input: &mut I, output: &mut O) -> Result<(), io::Error>
     where
