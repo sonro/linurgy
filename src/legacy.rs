@@ -30,9 +30,9 @@ pub enum Output<'b> {
 
 /// Use this to prepare and execute linurgy editing on a stream.
 ///
-/// A linurgy consists of an [`Input`](enum.Input.html), which will be read
+/// A linurgy consists of an [`Input`], which will be read
 /// line by line, edited by user defined rules, and then streamed into an
-/// [`Output`](enum.Output.html).
+/// [`Output`].
 #[derive(Debug)]
 pub struct LinurgyBuilder<'a, 'b, 'c> {
     input: Input<'a>,
@@ -60,11 +60,11 @@ impl Default for LinurgyBuilder<'_, '_, '_> {
 
 impl<'a, 'b, 'c> LinurgyBuilder<'a, 'b, 'c> {
     /// Instantiate a new builder with default values.
-    /// - Input: [`Input::StdIn`](enum.Input.html#variant.StdIn),
-    /// - Output: [`Output::StdOut`](enum.Output.html#variant.StdOut),
+    /// - Input: [`Input::StdIn`],
+    /// - Output: [`Output::StdOut`],
     /// - Newline count trigger: 2,
     /// - New text : "-------\n",
-    /// - EditType: [`EditType::Append`](enum.EditType.html#variant.Append)
+    /// - EditType: [`EditType::Append`]
     ///
     /// This will read from `stdin`,
     /// add dashes after 2 empty lines, and write to `stdout`.
@@ -166,7 +166,7 @@ impl<'a, 'b, 'c> LinurgyBuilder<'a, 'b, 'c> {
     /// Execute the linurgy edits on the specified input stream.
     ///
     /// This function will block until the input stream is exhausted.
-    /// If the input stream is [`Input::StdIn`](enum.Input.html#varient.StdIn),
+    /// If the input stream is [`Input::StdIn`],
     /// then `stdin` will be locked while this function runs.
     /// If `stdin` is locked elsewhere, this function will block until it
     /// becomes available again.
