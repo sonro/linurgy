@@ -1,3 +1,4 @@
+#![allow(deprecated)]
 use linurgy::*;
 
 fn main() -> Result<(), std::io::Error> {

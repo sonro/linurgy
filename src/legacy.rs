@@ -42,12 +42,14 @@ assert_eq!("Remove\nEvery\nEmpty\nLine\n", &output);
 # }
 ```
 */
+#![allow(deprecated)]
 use crate::EditType;
 use std::fs;
 use std::io::{self, Write};
 
 /// Type of input stream to edit
 #[derive(PartialEq, Eq, Debug)]
+#[deprecated]
 pub enum Input<'a> {
     /// Basic line by line read from stdin
     StdIn,
@@ -61,6 +63,7 @@ pub enum Input<'a> {
 
 /// Type of output stream to write edits to
 #[derive(PartialEq, Eq, Debug)]
+#[deprecated]
 pub enum Output<'b> {
     /// Basic line by line output to stdout
     StdOut,
@@ -78,6 +81,7 @@ pub enum Output<'b> {
 /// line by line, edited by user defined rules, and then streamed into an
 /// [`Output`].
 #[derive(Debug)]
+#[deprecated]
 pub struct LinurgyBuilder<'a, 'b, 'c> {
     input: Input<'a>,
     output: Output<'b>,

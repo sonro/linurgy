@@ -1,3 +1,4 @@
+#![allow(deprecated)]
 use linurgy::*;
 use std::fs;
 

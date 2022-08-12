@@ -87,8 +87,11 @@ assert_eq!("foo\n\n---\nbar", from_utf8(&output)?);
 
 mod editor;
 pub mod factory;
-mod legacy;
+pub mod legacy;
 
 pub use editor::{Editor, NewlineType};
+
+#[allow(deprecated)]
 pub use factory::EditType;
-pub use legacy::*;
+#[allow(deprecated)]
+pub use legacy::{Input, LinurgyBuilder, Output};

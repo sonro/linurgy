@@ -22,10 +22,12 @@ let output = editor.edit("foo\n\nbar");
 assert_eq!("foo\n\n---bar", output);
 ```
 */
+#![allow(deprecated)]
 use crate::{Editor, NewlineType};
 
 /// Which action to implement when editing
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[deprecated(note = "will become private")]
 pub enum EditType {
     /// New edits will appear after newlines
     Append,
