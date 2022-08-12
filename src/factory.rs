@@ -1,7 +1,27 @@
-//! Convenience functions for creating a configuired [`Editor`].
-//! Variations are based on the desired type of edit: append, insert, or
-//! replace. Each has a [`CRLF`](NewlineType#variant.Crlf) version.
+/*!
+Convenience functions for creating a configuired [`Editor`]. Variations are based on the desired
+type of edit: append, insert, or replace. Each has a [`CRLF`](NewlineType#variant.Crlf) version.
 
+# Examples
+
+Using factory function
+
+```rust
+# use linurgy::factory;
+let editor = factory::appender("---", 2);
+let output = editor.edit("foo\n\nbar");
+assert_eq!("foo\n\n---bar", output);
+```
+
+Creating manually
+
+```rust
+# use linurgy::{Editor, NewlineType};
+let editor = Editor::new(String::from("\n\n---"), 2, NewlineType::Lf);
+let output = editor.edit("foo\n\nbar");
+assert_eq!("foo\n\n---bar", output);
+```
+*/
 use crate::{Editor, NewlineType};
 
 /// Which action to implement when editing

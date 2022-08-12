@@ -3,7 +3,7 @@ use std::io::{self, BufRead, Write};
 
 const BUFSIZE: usize = 1024;
 
-/// Line-ending text editor.
+/// Line-ending text editor
 ///
 /// This is a text editor that replaces line-endings with a specified string.
 /// This replacement only happens when the number of newlines matches the
@@ -129,7 +129,7 @@ pub struct Editor {
     line_ending: NewlineType,
 }
 
-/// The two types of
+/// The two types of.
 /// [newline](https://en.wikipedia.org/wiki/Newline#Issues_with_different_newline_formats)
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum NewlineType {
@@ -141,7 +141,7 @@ pub enum NewlineType {
 }
 
 impl Editor {
-    /// Create a new editor.
+    /// Create a new editor
     ///
     /// - `replace`: string to replace newlines with.
     /// - `newlines`: number of newlines to trigger the replacement.
@@ -176,7 +176,7 @@ impl Editor {
         }
     }
 
-    /// Edit the input's newlines.
+    /// Edit the input's newlines
     ///
     /// Produces a [`String`] containing the edited text according to how this
     /// editor was constructed. Can be used multiple times. The `replace`
@@ -198,7 +198,10 @@ impl Editor {
         }
     }
 
-    /// Edit the input buffer's newlines into the output buffer.
+    /// Edit the input buffer's newlines into the output writer
+    ///
+    /// Input types must implement [`BufReader`](std::io::BufReader).
+    /// Output types must implement [`Write`](std::io::Write).
     ///
     /// Text is edited according to how this editor was constructed. Can be
     /// used multiple times. The `replace` string is used to replace newlines
