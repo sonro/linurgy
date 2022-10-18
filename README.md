@@ -2,8 +2,8 @@
 
 [![Crates.io](https://img.shields.io/crates/v/linurgy.svg)](https://crates.io/crates/linurgy)
 [![msrv 1.32](https://img.shields.io/badge/msrv-1.32-dea584.svg)](https://github.com/rust-lang/rust/releases/tag/1.32.0)
+[![tests](https://github.com/sonro/linurgy/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/sonro/linurgy/actions/workflows/tests.yml)
 [![Documentation](https://docs.rs/linurgy/badge.svg)](https://docs.rs/linurgy/)
-[![Rust CI](https://github.com/sonro/linurgy/actions/workflows/rust.yml/badge.svg)](https://github.com/sonro/linurgy/actions/workflows/rust.yml)
 [![license](https://img.shields.io/crates/l/linurgy.svg)](#license)
 
 Rust library to manipulate multiple newlines.
