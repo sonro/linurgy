@@ -2,7 +2,7 @@
 
 [![Crates.io](https://img.shields.io/crates/v/linurgy.svg)](https://crates.io/crates/linurgy)
 [![msrv
-1.31.1](https://img.shields.io/badge/msrv-1.31.1-dea584.svg)](https://github.com/rust-lang/rust/releases/tag/1.31.1)
+1.32](https://img.shields.io/badge/msrv-1.32-dea584.svg)](https://github.com/rust-lang/rust/releases/tag/1.32.0)
 [![tests](https://github.com/sonro/linurgy/actions/workflows/tests.yml/badge.svg)](https://github.com/sonro/linurgy/actions/workflows/tests.yml)
 [![Documentation](https://docs.rs/linurgy/badge.svg)](https://docs.rs/linurgy/)
 [![license](https://img.shields.io/crates/l/linurgy.svg)](#license)

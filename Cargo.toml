@@ -13,4 +13,4 @@ license = "MIT OR Apache-2.0"
 readme = "README.md"
 keywords = ["line", "newline", "text", "stream", "ending"]
 categories = ["text-processing"]
-metadata = { msrv = "1.31.1" }
+metadata = { msrv = "1.32.0" }

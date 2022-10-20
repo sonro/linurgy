@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         # minimum supported rust version
-        rust: [1.31.1, stable]
+        rust: [1.32.0, stable]
         on: 
           - { os: ubuntu-latest, target: x86_64-unknown-linux-gnu }
           - { os: macos-latest, target: x86_64-apple-darwin }
