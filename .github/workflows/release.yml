@@ -9,7 +9,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
 
       - name: Wait for tests to succeed
         uses: lewagon/wait-on-check-action@v1.0.0
@@ -25,3 +25,19 @@ jobs:
           command: publish
           args: --token ${{ secrets.CRATES_TOKEN }}
 
+  create-release:
+    needs: publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: taiki-e/create-gh-release-action@v1
+        with:
+          # (Optional)
+          changelog: CHANGELOG.md
+          # (Optional) Format of title.
+          # [default value: $tag]
+          # [possible values: variables $tag, $version, and any string]
+          title: $version
+          # (Required) GitHub token for creating GitHub Releases.
+          token: ${{ secrets.GITHUB_TOKEN }}
