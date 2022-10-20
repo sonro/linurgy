@@ -12,6 +12,10 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 - [**BREAKING**] Remove deprecated legacy api.
 
+### Documentation
+
+- Add minimum supported rust versionA: 1.31.1
+
 ## [0.5.0] - 2022-08-12
 
 ### Added
