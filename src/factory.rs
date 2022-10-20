@@ -22,22 +22,7 @@ let output = editor.edit("foo\n\nbar");
 assert_eq!("foo\n\n---bar", output);
 ```
 */
-#![allow(deprecated)]
 use crate::{Editor, NewlineType};
-
-/// Which action to implement when editing
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[deprecated(note = "will become private")]
-pub enum EditType {
-    /// New edits will appear after newlines
-    Append,
-
-    /// New edits will appear before newlines
-    Insert,
-
-    /// New edits will appear instead of newlines
-    Replace,
-}
 
 /// Create an [`Editor`] that appends text *after* newlines.
 #[inline]
@@ -88,6 +73,19 @@ struct Factory<'a> {
 
     /// Number of newlines to trigger replacement.
     trigger: u8,
+}
+
+/// Which action to implement when editing
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+enum EditType {
+    /// New edits will appear after newlines
+    Append,
+
+    /// New edits will appear before newlines
+    Insert,
+
+    /// New edits will appear instead of newlines
+    Replace,
 }
 
 impl<'a> Factory<'a> {
