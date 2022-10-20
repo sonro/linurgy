@@ -11,6 +11,22 @@ We welcome any form of contribution:
 **Note**: Before you take the time to open a pull request, please open an issue
 first.
 
+## CI
+
+Our continuous integration workflow checks all pull requests to ensure:
+
+- All tests pass on stable and Rust 1.32.0
+- No [clippy](https://github.com/rust-lang/rust-clippy) errors or warnings
+- [Rustfmt](https://github.com/rust-lang/rustfmt) is adhered to
+
+To check this on your own machine run `cargo test`, `cargo clippy`, and `cargo
+fmt --check`.
+
+### MSRV
+
+The current minimum supported Rust version of this project is 1.32.0. If your
+change requires a newer version we are open to upgrading.
+
 ## Commit messages
 
 Please try to keep your git commit messages in line with [Conventional
