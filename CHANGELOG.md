@@ -8,6 +8,8 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.6.0] - 2022-10-20
+
 ### Changed
 
 - [**BREAKING**] Remove deprecated legacy api.
@@ -34,6 +36,7 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - [**BREAKING**] Error handling delegated to the user. No more unwraps in the
   library.
 
-[Unreleased]: https://github.com/sonro/linurgy/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/sonro/linurgy/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/sonro/linurgy/releases/tag/v0.6.0
 [0.5.0]: https://github.com/sonro/linurgy/releases/tag/v0.5.0
 [0.4.0]: https://github.com/sonro/linurgy/releases/tag/v0.4.0
