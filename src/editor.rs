@@ -261,27 +261,27 @@ mod tests {
         }
     }
 
-    mod buffered {
-        use super::*;
-        use std::io::BufReader;
+    // mod buffered {
+    //     use super::*;
+    //     use std::io::BufReader;
 
-        editor_tests!(assert_edit_buffered);
+    //     editor_tests!(assert_edit_buffered);
 
-        fn assert_edit_buffered(test: EditTest) {
-            let mut input = BufReader::new(test.input.as_bytes());
+    //     fn assert_edit_buffered(test: EditTest) {
+    //         let mut input = BufReader::new(test.input.as_bytes());
 
-            let mut output: Vec<u8> = Vec::new();
+    //         let mut output: Vec<u8> = Vec::new();
 
-            let replace = test.replace.to_string();
-            let editor = Editor::new(replace, test.newlines, test.line_ending);
+    //         let replace = test.replace.to_string();
+    //         let editor = Editor::new(replace, test.newlines, test.line_ending);
 
-            editor.edit_buffered(&mut input, &mut output).unwrap();
+    //         editor.edit_buffered(&mut input, &mut output).unwrap();
 
-            let actual = String::from_utf8_lossy(&output);
+    //         let actual = String::from_utf8_lossy(&output);
 
-            assert_eq!(test.expected, actual, "\ntest: {}\n", test.name);
-        }
-    }
+    //         assert_eq!(test.expected, actual, "\ntest: {}\n", test.name);
+    //     }
+    // }
 
     struct EditTest {
         pub name: &'static str,
