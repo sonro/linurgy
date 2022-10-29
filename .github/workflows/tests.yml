@@ -3,12 +3,12 @@ name: tests
 on:
   push:
     branches:
-      - 'master'
+      - "master"
 
   pull_request:
     branches:
-      - 'master'
-      - 'dev'
+      - "master"
+      - "dev"
 
 jobs:
   tests:
@@ -16,7 +16,7 @@ jobs:
       matrix:
         # minimum supported rust version
         rust: [1.32.0, stable]
-        on: 
+        on:
           - { os: ubuntu-latest, target: x86_64-unknown-linux-gnu }
           - { os: macos-latest, target: x86_64-apple-darwin }
           - { os: windows-latest, target: x86_64-pc-windows-msvc }
@@ -83,3 +83,29 @@ jobs:
           command: clippy
           args: --all --examples --tests -- -D warnings
 
+  codecov:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: Check coverage
+        uses: actions-rs/tarpaulin@v0.1
+        with:
+          version: 0.22.0
+          args: --ignore-tests --workspace -- --test-threads 1
+
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v3
+        with:
+          name: code_coverage_result
+          path: cobertura.xml
+
+      - name: Upload to codecov.io
+        uses: codecov/codecov-action@v3
+        with:
+          files: cobertura.xml
