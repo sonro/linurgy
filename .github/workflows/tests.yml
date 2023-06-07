@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - "master"
+      - "ci"
 
   pull_request:
     branches:
@@ -96,8 +97,8 @@ jobs:
       - name: Check coverage
         uses: actions-rs/tarpaulin@v0.1
         with:
-          version: 0.22.0
-          args: --ignore-tests --workspace -- --test-threads 1
+          version: latest
+          args: --ignore-tests --workspace --engine llvm -- --test-threads 1
 
       - name: Archive code coverage results
         uses: actions/upload-artifact@v3
