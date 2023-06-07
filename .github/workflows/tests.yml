@@ -35,11 +35,15 @@ jobs:
           toolchain: ${{ matrix.rust }}
           target: ${{ matrix.on.target }}
 
+      - name: Generate lockfile
+        if: hashFiles('Cargo.lock') == ''
+        run: cargo generate-lockfile
+
       - name: Build tests
-        run: cargo test --no-run --target ${{ matrix.on.target }}
+        run: cargo test --no-run --locked --all-features --target ${{ matrix.on.target }}
 
       - name: Run tests
-        run: cargo test --target ${{ matrix.on.target }}
+        run: cargo test --locked --all-features --target ${{ matrix.on.target }}
 
   rustfmt:
     runs-on: ubuntu-latest
