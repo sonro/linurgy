@@ -25,68 +25,47 @@ jobs:
           - { os: ubuntu-latest, target: x86_64-unknown-linux-gnu }
           - { os: macos-latest, target: x86_64-apple-darwin }
           - { os: windows-latest, target: x86_64-pc-windows-msvc }
-        include:
-          - use-cross: false
 
     runs-on: ${{ matrix.on.os }}
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.rust }}
           target: ${{ matrix.on.target }}
-          override: true
 
       - name: Build tests
-        uses: actions-rs/cargo@v1
-        with:
-          use-cross: ${{ matrix.use-cross }}
-          command: test
-          args: --no-run --target ${{ matrix.on.target }}
+        run: cargo test --no-run --target ${{ matrix.on.target }}
 
       - name: Run tests
-        uses: actions-rs/cargo@v1
-        with:
-          use-cross: ${{ matrix.use-cross }}
-          command: test
-          args: --target ${{ matrix.on.target }}
+        run: cargo test --target ${{ matrix.on.target }}
 
   rustfmt:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions-rs/toolchain@v1
+      - name: Install stable
+        uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
-          override: true
-          profile: minimal
           components: rustfmt
 
       - name: Run rustfmt
-        uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: -- --check
+        run: cargo fmt -- --check
 
   clippy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions-rs/toolchain@v1
+      - name: Install stable
+        uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
-          override: true
-          profile: minimal
           components: clippy
 
       - name: Run clippy
-        uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: --all --examples --tests -- -D warnings
+        run: cargo clippy --all --examples --tests -- -D warnings
 
   coverage:
     runs-on: ubuntu-latest
@@ -105,7 +84,7 @@ jobs:
         if: hashFiles('Cargo.lock') == ''
         run: cargo generate-lockfile
 
-      - name: cargo llvm-cov
+      - name: llvm-cov
         run: cargo llvm-cov --locked --all-features --lcov --output-path lcov.info
 
       - name: Archive code coverage results
