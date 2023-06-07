@@ -11,9 +11,13 @@ on:
       - "master"
       - "dev"
 
+env:
+  RUST_BACKTRACE: 1
+
 jobs:
   tests:
     strategy:
+      fail-fast: false
       matrix:
         # minimum supported rust version
         rust: [1.32.0, stable]
@@ -84,29 +88,34 @@ jobs:
           command: clippy
           args: --all --examples --tests -- -D warnings
 
-  codecov:
+  coverage:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions-rs/toolchain@v1
+      - name: Install stable
+        uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
-          override: true
+          components: llvm-tools-preview
 
-      - name: Check coverage
-        uses: actions-rs/tarpaulin@v0.1
-        with:
-          version: latest
-          args: --ignore-tests --workspace --engine llvm -- --test-threads 1
+      - name: cargo install cargo-llvm-cov
+        uses: taiki-e/install-action@cargo-llvm-cov
+
+      - name: cargo generate-lockfile
+        if: hashFiles('Cargo.lock') == ''
+        run: cargo generate-lockfile
+
+      - name: cargo llvm-cov
+        run: cargo llvm-cov --locked --all-features --lcov --output-path lcov.info
 
       - name: Archive code coverage results
         uses: actions/upload-artifact@v3
         with:
           name: code_coverage_result
-          path: cobertura.xml
+          path: lcov.info
 
       - name: Upload to codecov.io
         uses: codecov/codecov-action@v3
         with:
-          files: cobertura.xml
+          files: lcov.info
+          fail_ci_if_error: true
