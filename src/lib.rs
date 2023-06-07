@@ -104,8 +104,8 @@ pub mod factory;
 /// [`String`] containing the edited text.
 ///
 /// Use the [`Editor::edit_buffered`] method to edit a
-/// [`BufRead`](std::io::BufRead) into a [`Write`] output. This is useful
-/// for editing files, stdio, or other streams.
+/// [`BufRead`](std::io::BufRead) into a [`Write`](std::io::Write) output. This
+/// is useful for editing files, stdio, or other streams.
 ///
 /// # Newline type
 ///

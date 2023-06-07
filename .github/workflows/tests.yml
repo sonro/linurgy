@@ -45,6 +45,20 @@ jobs:
       - name: Run tests
         run: cargo test --locked --all-features --target ${{ matrix.on.target }}
 
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install nightly
+        uses: dtolnay/rust-toolchain@nightly
+
+      - name: cargo doc
+        run: cargo doc --no-deps --all-features
+
+        env:
+          RUSTDOCFLAGS: --cfg docsrs -D warnings
+
   rustfmt:
     runs-on: ubuntu-latest
     steps:
