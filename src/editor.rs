@@ -65,8 +65,8 @@ impl Editor {
 
     /// Edit the input buffer's newlines into the output writer
     ///
-    /// Input types must implement [`BufRead`](std::io::BufRead).
-    /// Output types must implement [`Write`](std::io::Write).
+    /// Input types must implement [`BufRead`].
+    /// Output types must implement [`Write`].
     ///
     /// Text is edited according to how this editor was constructed. Can be
     /// used multiple times. The `replace` string is used to replace newlines

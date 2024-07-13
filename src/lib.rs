@@ -115,7 +115,7 @@ pub mod factory;
 ///
 /// # Factory
 ///
-/// Users of this library are encouraged to use the [`factory`](crate::factory)
+/// Users of this library are encouraged to use the [`factory`]
 /// functions. These provide convient ways to create instances of this type.
 ///
 /// For example, to append dashes to each newline:
